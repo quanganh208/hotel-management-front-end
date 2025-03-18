@@ -21,8 +21,8 @@ export default function HeroSection() {
           priority
         />
       </motion.div>
-      <div className="container relative z-10 py-24 md:py-32">
-        <div className="grid gap-8 md:grid-cols-2 items-center">
+      <div className="container relative z-10 py-24 lg:py-32">
+        <div className="grid gap-8 lg:grid-cols-2 items-center">
           <div className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -34,7 +34,7 @@ export default function HeroSection() {
               </Badge>
             </motion.div>
             <motion.h1
-              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
+              className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}

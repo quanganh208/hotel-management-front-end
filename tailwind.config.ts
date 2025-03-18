@@ -76,4 +76,4 @@ module.exports = {
     },
   },
   plugins: [tailwindcss_animate],
-}
+};

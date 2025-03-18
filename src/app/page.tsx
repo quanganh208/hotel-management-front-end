@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import TrustedBySection from "@/components/landing/TrustedBySection";
@@ -27,20 +27,20 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header/>
+      <Header />
       <main className="flex-1">
-        <HeroSection/>
-        <TrustedBySection/>
-        <FeaturesSection/>
-        <BenefitsSection/>
-        <DemoSection/>
-        <TestimonialsSection/>
-        <PricingSection/>
-        <CTASection/>
-        <FAQSection/>
-        <ContactSection/>
+        <HeroSection />
+        <TrustedBySection />
+        <FeaturesSection />
+        <BenefitsSection />
+        <DemoSection />
+        <TestimonialsSection />
+        <PricingSection />
+        <CTASection />
+        <FAQSection />
+        <ContactSection />
       </main>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

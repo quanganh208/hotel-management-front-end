@@ -18,7 +18,7 @@ export default function TrustedBySection() {
             </h2>
           </motion.div>
           <motion.div
-            className="flex flex-wrap justify-center items-center gap-8 md:gap-16"
+            className="flex flex-wrap justify-center items-center gap-8 lg:gap-16"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"

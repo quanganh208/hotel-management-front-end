@@ -1,25 +1,25 @@
 import Link from "next/link";
-import {motion} from "framer-motion";
-import {Building2, ShieldCheck} from "lucide-react";
-import {ThemeToggle} from "@/components/theme-toggle";
+import { motion } from "framer-motion";
+import { Building2, ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Footer() {
   return (
     <motion.footer
       className="bg-muted/50 border-t py-12"
-      initial={{opacity: 0}}
-      whileInView={{opacity: 1}}
-      transition={{duration: 0.8}}
-      viewport={{once: true}}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
     >
       <div className="container">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
             <motion.div
               className="flex items-center gap-2"
-              whileHover={{x: 5}}
+              whileHover={{ x: 5 }}
             >
-              <Building2 className="h-6 w-6 text-primary"/>
+              <Building2 className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">HotelManager Pro</span>
             </motion.div>
             <p className="text-muted-foreground">
@@ -54,8 +54,7 @@ export default function Footer() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path
-                    d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
                 </svg>,
                 <svg
                   key="instagram"
@@ -92,8 +91,8 @@ export default function Footer() {
               ].map((icon, i) => (
                 <motion.div
                   key={i}
-                  whileHover={{scale: 1.2, rotate: 5}}
-                  whileTap={{scale: 0.9}}
+                  whileHover={{ scale: 1.2, rotate: 5 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <Link
                     href="#"
@@ -109,28 +108,28 @@ export default function Footer() {
             {
               title: "Sản phẩm",
               links: [
-                {name: "Tính năng", href: "#features"},
-                {name: "Bảng giá", href: "#pricing"},
-                {name: "Tích hợp", href: "#"},
-                {name: "Cập nhật mới", href: "#"},
+                { name: "Tính năng", href: "#features" },
+                { name: "Bảng giá", href: "#pricing" },
+                { name: "Tích hợp", href: "#" },
+                { name: "Cập nhật mới", href: "#" },
               ],
             },
             {
               title: "Hỗ trợ",
               links: [
-                {name: "Trung tâm trợ giúp", href: "#"},
-                {name: "Hướng dẫn sử dụng", href: "#"},
-                {name: "Cộng đồng", href: "#"},
-                {name: "Đào tạo", href: "#"},
+                { name: "Trung tâm trợ giúp", href: "#" },
+                { name: "Hướng dẫn sử dụng", href: "#" },
+                { name: "Cộng đồng", href: "#" },
+                { name: "Đào tạo", href: "#" },
               ],
             },
             {
               title: "Công ty",
               links: [
-                {name: "Về chúng tôi", href: "#"},
-                {name: "Blog", href: "#"},
-                {name: "Đối tác", href: "#"},
-                {name: "Tuyển dụng", href: "#"},
+                { name: "Về chúng tôi", href: "#" },
+                { name: "Blog", href: "#" },
+                { name: "Đối tác", href: "#" },
+                { name: "Tuyển dụng", href: "#" },
               ],
             },
           ].map((section, i) => (
@@ -138,7 +137,7 @@ export default function Footer() {
               <h3 className="font-medium text-lg mb-4">{section.title}</h3>
               <ul className="space-y-2">
                 {section.links.map((link, j) => (
-                  <motion.li key={j} whileHover={{x: 5}}>
+                  <motion.li key={j} whileHover={{ x: 5 }}>
                     <Link
                       href={link.href}
                       className="text-muted-foreground hover:text-foreground"
@@ -153,27 +152,27 @@ export default function Footer() {
         </div>
         <motion.div
           className="mt-12 pt-8 border-t"
-          initial={{opacity: 0, y: 20}}
-          whileInView={{opacity: 1, y: 0}}
-          transition={{delay: 0.5}}
-          viewport={{once: true}}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          viewport={{ once: true }}
         >
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} HotelManager Pro. Tất cả các
               quyền được bảo lưu.
             </p>
             <div className="flex gap-6 items-center">
               {[
-                {name: "Điều khoản sử dụng", href: "#"},
-                {name: "Chính sách bảo mật", href: "#"},
+                { name: "Điều khoản sử dụng", href: "#" },
+                { name: "Chính sách bảo mật", href: "#" },
                 {
                   name: "Bảo mật dữ liệu",
                   href: "#",
-                  icon: <ShieldCheck className="h-4 w-4 inline-block mr-1"/>,
+                  icon: <ShieldCheck className="h-4 w-4 inline-block mr-1" />,
                 },
               ].map((link, i) => (
-                <motion.div key={i} whileHover={{y: -2}}>
+                <motion.div key={i} whileHover={{ y: -2 }}>
                   <Link
                     href={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground"
@@ -183,7 +182,7 @@ export default function Footer() {
                   </Link>
                 </motion.div>
               ))}
-              <motion.div whileHover={{y: -2}} className="flex items-center">
+              <motion.div whileHover={{ y: -2 }} className="flex items-center">
                 <ThemeToggle />
               </motion.div>
             </div>

@@ -29,7 +29,7 @@ export function useUser() {
       await login(email, password);
       return useUserStore.getState().error === null;
     },
-    [login]
+    [login],
   );
 
   // Hàm wrapper cho register
@@ -38,7 +38,7 @@ export function useUser() {
       await register(name, email, password);
       return useUserStore.getState().error === null;
     },
-    [register]
+    [register],
   );
 
   // Hàm wrapper cho update profile
@@ -47,7 +47,7 @@ export function useUser() {
       await updateProfile(data);
       return useUserStore.getState().error === null;
     },
-    [updateProfile]
+    [updateProfile],
   );
 
   return {

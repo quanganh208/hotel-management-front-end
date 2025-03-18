@@ -91,6 +91,6 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: "user-storage", // tên của item trong localStorage
-    }
-  )
+    },
+  ),
 );

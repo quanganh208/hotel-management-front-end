@@ -14,7 +14,7 @@ export default function BenefitsSection() {
     <AnimatedSection>
       <section className="bg-muted/30 border-y py-24">
         <div className="container">
-          <div className="grid gap-12 md:grid-cols-2 items-center">
+          <div className="grid gap-12 lg:grid-cols-2 items-center">
             <motion.div className="space-y-6" variants={fadeInUp}>
               <Badge>Lợi ích vượt trội</Badge>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">

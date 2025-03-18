@@ -30,7 +30,7 @@ export default function DemoSection() {
           </p>
         </motion.div>
 
-        <div className="grid gap-8 md:grid-cols-2 items-center">
+        <div className="grid gap-8 lg:grid-cols-2 items-center">
           <motion.div
             className="relative aspect-video rounded-lg overflow-hidden shadow-xl border"
             variants={fadeIn}

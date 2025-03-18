@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { CheckCircle2 } from "lucide-react";
-import {TabsContent } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
 
 export const fadeIn = {
   hidden: { opacity: 0 },

@@ -9,7 +9,7 @@ export default function ContactSection() {
     <AnimatedSection>
       <section id="contact" className="bg-muted/30 border-y py-24">
         <div className="container">
-          <div className="grid gap-12 md:grid-cols-2">
+          <div className="grid gap-12 lg:grid-cols-2">
             <motion.div className="space-y-6" variants={fadeInUp}>
               <Badge>Liên hệ</Badge>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">

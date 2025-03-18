@@ -34,7 +34,7 @@ export default function PricingSection() {
         </motion.div>
 
         <motion.div
-          className="grid gap-8 md:grid-cols-3"
+          className="grid gap-8 lg:grid-cols-3"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"

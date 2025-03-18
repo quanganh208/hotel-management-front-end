@@ -14,6 +14,18 @@ pnpm dev
 bun dev
 ```
 
+## Format code
+
+```bash
+npm run format
+# or
+yarn format
+# or
+pnpm format
+# or
+bun format
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
