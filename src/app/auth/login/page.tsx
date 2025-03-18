@@ -1,11 +1,11 @@
-import type { Metadata } from "next"
-import Image from "next/image"
+import type { Metadata } from "next";
+import Image from "next/image";
 import LoginForm from "@/components/auth/login-form";
 
 export const metadata: Metadata = {
   title: "Hotel Management System | Login",
   description: "Login to access the Hotel Management System",
-}
+};
 
 export default function LoginPage() {
   return (
@@ -31,5 +31,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

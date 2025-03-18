@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
   // Kiểm tra xem route hiện tại có nằm trong danh sách route công khai không
   const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
   // Nếu người dùng chưa đăng nhập và đang truy cập route yêu cầu xác thực

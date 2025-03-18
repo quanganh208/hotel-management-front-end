@@ -85,7 +85,7 @@ export default function LoginForm() {
 
       if (result?.error) {
         setError(
-          "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập."
+          "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.",
         );
         return;
       }
@@ -95,7 +95,7 @@ export default function LoginForm() {
       router.refresh();
     } catch (err) {
       setError(
-        "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập."
+        "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.",
       );
       console.error(err);
     } finally {
