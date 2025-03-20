@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import LoginForm from "@/components/auth/login-form";
+import ForgotPasswordForm from "@/components/auth/forgot-password-form";
 
 export const metadata: Metadata = {
-  title: "Hệ thống Quản lý Khách sạn | Đăng nhập",
-  description: "Đăng nhập vào Hệ thống Quản lý Khách sạn",
+  title: "Hệ thống Quản lý Khách sạn | Quên mật khẩu",
+  description:
+    "Đặt lại mật khẩu cho tài khoản Hệ thống Quản lý Khách sạn của bạn",
 };
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen w-full">
       {/* Left side - Image */}
@@ -24,10 +25,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right side - Login form */}
+      {/* Right side - Forgot Password form */}
       <div className="flex w-full items-center justify-center lg:w-1/2">
         <div className="mx-auto w-full max-w-md p-8">
-          <LoginForm />
+          <ForgotPasswordForm />
         </div>
       </div>
     </div>

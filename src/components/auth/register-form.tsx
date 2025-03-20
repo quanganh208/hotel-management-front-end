@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,15 +21,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function LoginForm() {
+export default function RegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const validateName = (name: string) => {
+    if (!name) {
+      setNameError("Họ và tên không được để trống");
+      return false;
+    }
+
+    if (name.length < 2) {
+      setNameError("Họ và tên phải có ít nhất 2 ký tự");
+      return false;
+    }
+
+    setNameError("");
+    return true;
+  };
 
   const validateEmail = (email: string) => {
     if (!email) {
@@ -63,13 +84,35 @@ export default function LoginForm() {
     return true;
   };
 
+  const validateConfirmPassword = (confirmPassword: string) => {
+    if (!confirmPassword) {
+      setConfirmPasswordError("Vui lòng xác nhận mật khẩu");
+      return false;
+    }
+
+    if (confirmPassword !== password) {
+      setConfirmPasswordError("Mật khẩu xác nhận không khớp");
+      return false;
+    }
+
+    setConfirmPasswordError("");
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const isNameValid = validateName(name);
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
+    const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
 
-    if (!isEmailValid || !isPasswordValid) {
+    if (
+      !isNameValid ||
+      !isEmailValid ||
+      !isPasswordValid ||
+      !isConfirmPasswordValid
+    ) {
       return;
     }
 
@@ -77,42 +120,61 @@ export default function LoginForm() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      // Thực hiện đăng ký tài khoản
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
       });
 
-      if (result?.error) {
-        setError(
-          "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập."
-        );
-        return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Đăng ký không thành công");
       }
 
-      // Chuyển hướng sau khi đăng nhập thành công
-      router.push("/dashboard");
-      router.refresh();
+      // Chuyển hướng đến trang đăng nhập sau khi đăng ký thành công
+      router.push("/login?registered=true");
     } catch (err) {
-      setError(
-        "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập."
-      );
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Đăng ký không thành công. Vui lòng thử lại sau.");
+      }
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignup = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      await signIn("google", {
-        callbackUrl: "/dashboard",
+      // Sử dụng NextAuth để đăng nhập với Google
+      // Khi người dùng đăng nhập lần đầu, tài khoản sẽ được tạo tự động
+      const response = await fetch("/api/auth/signin/google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      if (!response.ok) {
+        throw new Error("Đăng ký với Google không thành công");
+      }
+
+      // Chuyển hướng sau khi đăng ký thành công
+      router.push("/dashboard");
     } catch (err) {
-      setError("Đăng nhập với Google không thành công. Vui lòng thử lại sau.");
+      setError("Đăng ký với Google không thành công. Vui lòng thử lại sau.");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -133,11 +195,10 @@ export default function LoginForm() {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <CardTitle className="text-2xl font-bold text-center">
-              Đăng nhập vào Hệ thống Quản lý Khách sạn
+              Đăng ký tài khoản mới
             </CardTitle>
             <CardDescription className="text-center pt-2">
-              Chào mừng bạn quay trở lại! Đăng nhập để quản lý khách sạn của bạn
-              một cách hiệu quả.
+              Tạo tài khoản để sử dụng Hệ thống Quản lý Khách sạn
             </CardDescription>
           </motion.div>
         </CardHeader>
@@ -155,6 +216,31 @@ export default function LoginForm() {
             </motion.div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Họ và tên</Label>
+              <div className="relative">
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Nhập họ và tên của bạn"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={() => validateName(name)}
+                  className="transition-all duration-300 focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              {nameError && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-sm font-medium text-destructive"
+                >
+                  {nameError}
+                </motion.p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -179,16 +265,9 @@ export default function LoginForm() {
                 </motion.p>
               )}
             </div>
+
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Mật khẩu</Label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Quên mật khẩu?
-                </Link>
-              </div>
+              <Label htmlFor="password">Mật khẩu</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -218,19 +297,57 @@ export default function LoginForm() {
                 </motion.p>
               )}
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Nhập lại mật khẩu của bạn"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => validateConfirmPassword(confirmPassword)}
+                  className="pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              {confirmPasswordError && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-sm font-medium text-destructive"
+                >
+                  {confirmPasswordError}
+                </motion.p>
+              )}
+            </div>
+
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang đăng nhập...
+                    Đang đăng ký...
                   </>
                 ) : (
-                  "Đăng nhập"
+                  "Đăng ký"
                 )}
               </Button>
             </motion.div>
           </form>
+
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -241,12 +358,13 @@ export default function LoginForm() {
               </span>
             </div>
           </div>
+
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               variant="outline"
               type="button"
               className="w-full"
-              onClick={handleGoogleLogin}
+              onClick={handleGoogleSignup}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -268,18 +386,15 @@ export default function LoginForm() {
                   ></path>
                 </svg>
               )}
-              Đăng nhập với Google
+              Đăng ký với Google
             </Button>
           </motion.div>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Chưa có tài khoản?{" "}
-            <Link
-              href="/auth/register"
-              className="text-primary hover:underline"
-            >
-              Đăng ký
+            Đã có tài khoản?{" "}
+            <Link href="/auth/login" className="text-primary hover:underline">
+              Đăng nhập
             </Link>
           </p>
         </CardFooter>

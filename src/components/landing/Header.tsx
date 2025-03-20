@@ -62,10 +62,14 @@ export default function Header() {
         {/* Desktop Buttons */}
         <div className="hidden lg:flex items-center gap-4">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="outline">Đăng nhập</Button>
+            <Button asChild variant="outline">
+              <Link href="/auth/login">Đăng nhập</Link>
+            </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button>Dùng thử miễn phí</Button>
+            <Button asChild>
+              <Link href="/auth/register">Dùng thử miễn phí</Link>
+            </Button>
           </motion.div>
         </div>
 

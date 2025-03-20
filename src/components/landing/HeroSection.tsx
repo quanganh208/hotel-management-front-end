@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -69,8 +70,8 @@ export default function HeroSection() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button size="lg" variant="outline" className="gap-2">
-                  Dùng Thử Miễn Phí
+                <Button size="lg" variant="outline" className="gap-2" asChild>
+                  <Link href="/auth/register">Dùng thử Miễn Phí</Link>
                 </Button>
               </motion.div>
             </motion.div>

@@ -11,6 +11,7 @@ import {
   AnimatedTabContent,
   AnimatedListItem,
 } from "./AnimationComponents";
+import Link from "next/link";
 
 export default function DemoSection() {
   return (
@@ -160,7 +161,7 @@ export default function DemoSection() {
                 >
                   <Button size="lg" className="gap-2">
                     <LayoutDashboard className="h-5 w-5" />
-                    Dùng thử miễn phí 14 ngày
+                    <Link href="/auth/register">Dùng thử miễn phí 14 ngày</Link>
                   </Button>
                 </motion.div>
               </motion.div>
