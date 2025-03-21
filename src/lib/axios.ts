@@ -1,50 +1,51 @@
 import axios from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 const axiosInstance = axios.create({
   baseURL,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, // 10 giây timeout
 });
 
-// Request interceptor
+// Add a request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Lấy token từ localStorage nếu có
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Chỉ sử dụng localStorage ở phía client
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
-
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
-// Response interceptor
+// Add a response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    // Log chi tiết lỗi để debug
+    console.error("API error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      message: error.message,
+      code: error.code,
+    });
 
-    // Xử lý lỗi 401 Unauthorized
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      // Có thể thêm logic refresh token ở đây
-
-      // Hoặc chuyển hướng người dùng đến trang đăng nhập
-      if (typeof window !== "undefined") {
-        window.location.href = "/auth/login";
-      }
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      // Handle unauthorized error (e.g., redirect to login)
+      localStorage.removeItem("token");
     }
-
     return Promise.reject(error);
-  },
+  }
 );
 
 export default axiosInstance;

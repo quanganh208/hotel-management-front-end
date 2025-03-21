@@ -1,32 +1,8 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { AuthOptions } from "next-auth";
-
-// Định nghĩa kiểu dữ liệu mở rộng cho NextAuth
-declare module "next-auth" {
-  interface User {
-    id: string;
-    accessToken?: string;
-  }
-
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      accessToken?: string;
-    };
-  }
-}
-
-// Định nghĩa kiểu dữ liệu cho JWT
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    accessToken?: string;
-  }
-}
+import axiosInstance from "./axios";
+import { LoginResponse, ApiError } from "@/types/next-auth";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -38,49 +14,43 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email và mật khẩu là bắt buộc");
         }
 
         try {
-          // Gọi API service của bạn để xác thực người dùng
-          // Đọc URL từ biến môi trường
-          // Fixed: Remove unused variable or use it in the uncommented code
-          // const authApiUrl = process.env.API_AUTH_URL || "http://localhost:8000";
+          const response = await authService.login(
+            credentials.email,
+            credentials.password
+          );
 
-          // Tạm thời trả về user mẫu để thử nghiệm
-          // Bỏ comment phần này và comment phần gọi API khi service chưa sẵn sàng
-          return {
-            id: "123",
-            name: "Test User",
-            email: credentials.email,
-            accessToken: "test-token",
-          };
-
-          /* Tạm thời comment lại phần gọi API thực tế
-          const authApiUrl = process.env.API_AUTH_URL || "http://localhost:8000";
-          const response = await axios.post(`${authApiUrl}/login`, {
-            email: credentials.email,
-            password: credentials.password,
-          });
-
-          // Nếu API trả về dữ liệu người dùng thành công
-          if (response.data && response.data.user) {
-            // Trả về đối tượng user mà NextAuth sẽ lưu vào session
+          if (response && response.access_token) {
             return {
-              id: response.data.user.id,
-              name: response.data.user.name,
-              email: response.data.user.email,
-              // Lưu token từ API nếu cần
-              accessToken: response.data.accessToken,
+              id: response._id,
+              name: response.name,
+              email: response.email,
+              accessToken: response.access_token,
             };
           }
-          */
 
           return null;
-        } catch (error) {
+        } catch (error: any) {
           console.error("Authentication error:", error);
-          // Tạm thời trả về null thay vì throw error để tránh lỗi không mong muốn
-          return null;
+
+          // Xử lý lỗi kết nối
+          if (error.code === "ECONNREFUSED") {
+            throw new Error(
+              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
+            );
+          }
+
+          // Trả về đúng thông báo lỗi từ API nếu có
+          if (error.response?.data) {
+            const apiError = error.response.data as ApiError;
+            throw new Error(apiError.message);
+          }
+
+          // Lỗi chung
+          throw new Error("Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.");
         }
       },
     }),
@@ -120,3 +90,41 @@ const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
 export const { auth, signIn, signOut } = handler;
+
+export const authService = {
+  async login(email: string, password: string): Promise<LoginResponse> {
+    try {
+      const data = {
+        email,
+        password,
+      };
+
+      const response = await axiosInstance.post<LoginResponse>(
+        "/auth/login",
+        data
+      );
+
+      console.log("Đăng nhập thành công:", response.data.message);
+
+      // Lưu token vào localStorage (chỉ ở phía client)
+      if (typeof window !== "undefined" && response.data.access_token) {
+        localStorage.setItem("token", response.data.access_token);
+      }
+
+      return response.data;
+    } catch (error: any) {
+      console.error("Login error:", {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+      });
+      throw error;
+    }
+  },
+
+  async logout() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
+  },
+};

@@ -84,9 +84,7 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError(
-          "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập."
-        );
+        setError(result.error);
         return;
       }
 
@@ -95,7 +93,9 @@ export default function LoginForm() {
       router.refresh();
     } catch (err) {
       setError(
-        "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin đăng nhập."
+        err instanceof Error
+          ? err.message
+          : "Đăng nhập không thành công. Vui lòng thử lại sau."
       );
       console.error(err);
     } finally {
@@ -112,7 +112,11 @@ export default function LoginForm() {
         callbackUrl: "/dashboard",
       });
     } catch (err) {
-      setError("Đăng nhập với Google không thành công. Vui lòng thử lại sau.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
+      );
       console.error(err);
     } finally {
       setIsLoading(false);
