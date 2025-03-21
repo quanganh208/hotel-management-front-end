@@ -7,7 +7,6 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000, // 10 giây timeout
 });
 
 // Add a request interceptor
@@ -24,7 +23,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add a response interceptor
@@ -45,7 +44,7 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("token");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

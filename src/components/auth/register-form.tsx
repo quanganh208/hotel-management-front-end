@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import axiosInstance from "@/lib/axios";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -120,34 +121,40 @@ export default function RegisterForm() {
     setError("");
 
     try {
-      // Thực hiện đăng ký tài khoản
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
+      // Sử dụng axiosInstance thay vì fetch để gọi API đăng ký
+      const data = {
+        name,
+        email,
+        password,
+      };
 
-      const data = await response.json();
+      const response = await axiosInstance.post("/auth/register", data);
 
-      if (!response.ok) {
-        throw new Error(data.message || "Đăng ký không thành công");
+      // Xử lý phản hồi thành công
+      if (response.data?.message) {
+        // Lưu email vào localStorage để sử dụng trong trang xác thực
+        if (typeof window !== "undefined") {
+          localStorage.setItem("verificationEmail", email);
+        }
+
+        // Chuyển hướng đến trang xác minh tài khoản
+        router.push("/auth/verify-account");
       }
-
-      // Chuyển hướng đến trang đăng nhập sau khi đăng ký thành công
-      router.push("/login?registered=true");
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
+    } catch (err: any) {
+      // Xử lý lỗi từ API và hiển thị thông báo chính xác
+      if (err.response?.data?.message) {
+        // Hiển thị thông báo lỗi trả về từ API
+        setError(err.response.data.message);
+      } else if (err.code === "ECONNREFUSED") {
+        // Lỗi kết nối đến server
+        setError(
+          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối hoặc thử lại sau."
+        );
       } else {
+        // Lỗi chung
         setError("Đăng ký không thành công. Vui lòng thử lại sau.");
       }
-      console.error(err);
+      console.error("Đăng ký lỗi:", err);
     } finally {
       setIsLoading(false);
     }

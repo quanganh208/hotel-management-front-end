@@ -1,16 +1,16 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import {AuthOptions} from "next-auth";
+import { AuthOptions } from "next-auth";
 import axiosInstance from "./axios";
-import {LoginResponse, ApiError} from "@/types/next-auth";
+import { LoginResponse, ApiError } from "@/types/next-auth";
 
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: {label: "Email", type: "email"},
-        password: {label: "Password", type: "password"},
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -57,7 +57,7 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({token, user}) {
+    async jwt({ token, user }) {
       // Lưu dữ liệu từ user vào token
       if (user) {
         token.id = user.id;
@@ -65,7 +65,7 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({session, token}) {
+    async session({ session, token }) {
       // Lưu dữ liệu từ token vào session
       if (token && session.user) {
         session.user.id = token.id;
@@ -89,8 +89,8 @@ export const authOptions: AuthOptions = {
 // Fix: Use the correct export pattern for NextAuth.js with App Router
 const handler = NextAuth(authOptions);
 
-export {handler as GET, handler as POST};
-export const {auth, signIn, signOut} = handler;
+export { handler as GET, handler as POST };
+export const { auth, signIn, signOut } = handler;
 
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {

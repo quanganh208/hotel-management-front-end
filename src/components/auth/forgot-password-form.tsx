@@ -198,7 +198,7 @@ export default function ForgotPasswordForm() {
                       Đang gửi...
                     </>
                   ) : (
-                    "Gửi liên kết đặt lại mật khẩu"
+                    "Gửi email đặt lại mật khẩu"
                   )}
                 </Button>
               </motion.div>
