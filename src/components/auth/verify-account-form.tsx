@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -19,144 +17,75 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import axiosInstance from "@/lib/axios";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function VerifyAccountForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [email, setEmail] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [verificationCodeError, setVerificationCodeError] = useState("");
 
-  // Lấy email từ localStorage khi component được tải
+  // Lấy các state và action từ auth store
+  const {
+    verifyForm,
+    verifyFormError,
+    isLoading,
+    error,
+    success,
+    setVerificationCode,
+    verifyAccount,
+    resendVerificationCode,
+    setError,
+    resetMessages,
+  } = useAuthStore();
+
+  // Reset thông báo khi component mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    resetMessages();
+  }, [resetMessages]);
+
+  // Lấy email từ localStorage khi component được tải nếu không có trong store
+  useEffect(() => {
+    if (!verifyForm.email && typeof window !== "undefined") {
       const storedEmail = localStorage.getItem("verificationEmail");
       if (storedEmail) {
-        setEmail(storedEmail);
+        // Cập nhật email trong store từ localStorage
+        const updateEmail = async () => {
+          const { setRegisterForm } = useAuthStore.getState();
+          setRegisterForm("email", storedEmail);
+        };
+        updateEmail();
       }
     }
-  }, []);
-
-  // Validate mã xác thực
-  const validateVerificationCode = (code: string) => {
-    if (!code) {
-      setVerificationCodeError("Vui lòng nhập mã xác thực");
-      return false;
-    }
-
-    if (!/^\d+$/.test(code)) {
-      setVerificationCodeError("Mã xác thực chỉ được chứa các chữ số");
-      return false;
-    }
-
-    setVerificationCodeError("");
-    return true;
-  };
+  }, [verifyForm.email]);
 
   // Xử lý gửi lại mã xác thực
   const handleResendCode = async () => {
-    if (!email) {
-      setError("Không tìm thấy email để gửi lại mã xác thực");
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      // Gọi API gửi lại mã xác thực
-      const formData = new URLSearchParams();
-      formData.append("email", email);
-
-      const response = await axiosInstance.post(
-        "/auth/resend-verification",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      if (response.data?.message) {
-        setSuccess("Đã gửi lại mã xác thực, vui lòng kiểm tra email của bạn");
-      }
-    } catch (err: any) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Không thể gửi lại mã xác thực. Vui lòng thử lại sau.");
-      }
-      console.error("Lỗi gửi lại mã:", err);
-    } finally {
-      setIsLoading(false);
-    }
+    await resendVerificationCode();
   };
 
   // Xử lý submit form xác thực
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email) {
+    // Kiểm tra email
+    if (!verifyForm.email) {
       setError("Không tìm thấy email để xác thực");
       return;
     }
 
-    const isVerificationCodeValid = validateVerificationCode(verificationCode);
+    await verifyAccount();
 
-    if (!isVerificationCodeValid) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      // Gọi API xác thực tài khoản
-      const data = {
-        email,
-        verificationCode,
-      };
-
-      const response = await axiosInstance.post("/auth/activate", data);
-
-      if (response.data?.message) {
-        setSuccess("Xác thực tài khoản thành công");
-
-        // Xóa email đã lưu trong localStorage
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("verificationEmail");
-        }
-
-        // Chờ 2 giây rồi chuyển hướng đến trang đăng nhập
-        setTimeout(() => {
-          router.push("/auth/login?verified=true");
-        }, 2000);
-      }
-    } catch (err: any) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.code === "ECONNREFUSED") {
-        setError(
-          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối hoặc thử lại sau."
-        );
-      } else {
-        setError("Xác thực tài khoản không thành công. Vui lòng thử lại sau.");
-      }
-      console.error("Lỗi xác thực:", err);
-    } finally {
-      setIsLoading(false);
+    // Kiểm tra lại success sau khi verifyAccount hoàn thành
+    const currentSuccess = useAuthStore.getState().success;
+    if (currentSuccess) {
+      setTimeout(() => {
+        resetMessages();
+        router.push("/auth/login");
+      }, 2000);
     }
   };
 
@@ -210,12 +139,12 @@ export default function VerifyAccountForm() {
             </motion.div>
           )}
 
-          {email ? (
+          {verifyForm.email ? (
             <div className="text-center mb-4">
               <p className="text-muted-foreground">
                 Chúng tôi đã gửi mã xác thực đến
               </p>
-              <p className="font-medium">{email}</p>
+              <p className="font-medium">{verifyForm.email}</p>
             </div>
           ) : (
             <div className="text-center mb-4">
@@ -230,7 +159,7 @@ export default function VerifyAccountForm() {
               <Label htmlFor="verificationCode">Mã xác thực</Label>
               <InputOTP
                 maxLength={8}
-                value={verificationCode}
+                value={verifyForm.verificationCode}
                 onChange={setVerificationCode}
                 className="flex justify-center"
               >
@@ -248,14 +177,14 @@ export default function VerifyAccountForm() {
                   <InputOTPSlot index={7} className="h-12" />
                 </InputOTPGroup>
               </InputOTP>
-              {verificationCodeError && (
+              {verifyFormError && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {verificationCodeError}
+                  {verifyFormError}
                 </motion.p>
               )}
             </div>

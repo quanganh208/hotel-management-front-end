@@ -1,13 +1,10 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,106 +18,60 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Lấy các state và action từ auth store
+  const {
+    loginForm,
+    loginFormErrors,
+    isLoading,
+    error,
+    success,
+    setLoginForm,
+    validateLoginField,
+    login,
+    loginWithGoogle,
+    resetMessages,
+  } = useAuthStore();
+
+  // State cho hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
-  const validateEmail = (email: string) => {
-    if (!email) {
-      setEmailError("Email không được để trống");
-      return false;
-    }
+  // Reset thông báo khi component mount
+  useEffect(() => {
+    resetMessages();
+  }, [resetMessages]);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError("Email không hợp lệ");
-      return false;
-    }
-
-    setEmailError("");
-    return true;
+  // Xử lý khi thay đổi giá trị input
+  const handleInputChange = (field: "email" | "password", value: string) => {
+    setLoginForm(field, value);
   };
 
-  const validatePassword = (password: string) => {
-    if (!password) {
-      setPasswordError("Mật khẩu không được để trống");
-      return false;
-    }
-
-    if (password.length < 6) {
-      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
-      return false;
-    }
-
-    setPasswordError("");
-    return true;
+  // Xử lý khi blur input để validate
+  const handleInputBlur = (field: "email" | "password") => {
+    validateLoginField(field);
   };
 
+  // Xử lý submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const loginSuccess = await login();
 
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-
-    if (!isEmailValid || !isPasswordValid) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError(result.error);
-        return;
-      }
-
-      // Chuyển hướng sau khi đăng nhập thành công
-      router.push("/dashboard");
-      router.refresh();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Đăng nhập không thành công. Vui lòng thử lại sau."
-      );
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+    if (loginSuccess) {
+      // Chờ 1 giây để hiển thị thông báo thành công trước khi chuyển hướng
+      setTimeout(() => {
+        resetMessages();
+        router.push("/dashboard");
+        router.refresh();
+      }, 1000);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      await signIn("google", {
-        callbackUrl: "/dashboard",
-      });
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
-      );
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    await loginWithGoogle();
   };
 
   return (
@@ -158,6 +109,22 @@ export default function LoginForm() {
               </Alert>
             </motion.div>
           )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-4"
+            >
+              <Alert>
+                <AlertDescription className="text-green-600">
+                  {success}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -166,20 +133,20 @@ export default function LoginForm() {
                   id="email"
                   type="email"
                   placeholder="Nhập email của bạn"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => validateEmail(email)}
+                  value={loginForm.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  onBlur={() => handleInputBlur("email")}
                   className="transition-all duration-300 focus:ring-2 focus:ring-primary"
                 />
               </div>
-              {emailError && (
+              {loginFormErrors.email && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {emailError}
+                  {loginFormErrors.email}
                 </motion.p>
               )}
             </div>
@@ -198,9 +165,11 @@ export default function LoginForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Nhập mật khẩu của bạn"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={() => validatePassword(password)}
+                  value={loginForm.password}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  onBlur={() => handleInputBlur("password")}
                   className="pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary"
                 />
                 <button
@@ -211,14 +180,14 @@ export default function LoginForm() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {passwordError && (
+              {loginFormErrors.password && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {passwordError}
+                  {loginFormErrors.password}
                 </motion.p>
               )}
             </div>

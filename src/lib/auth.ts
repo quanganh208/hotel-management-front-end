@@ -105,11 +105,6 @@ export const authService = {
         data
       );
 
-      // Lưu token vào localStorage (chỉ ở phía client)
-      if (typeof window !== "undefined" && response.data.access_token) {
-        localStorage.setItem("token", response.data.access_token);
-      }
-
       return response.data;
       //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -119,7 +114,7 @@ export const authService = {
 
   async logout() {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
     }
   },
 };

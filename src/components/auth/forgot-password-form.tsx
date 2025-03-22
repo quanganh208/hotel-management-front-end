@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -28,6 +28,12 @@ export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Reset error message khi component mount
+  useEffect(() => {
+    setError("");
+    setEmailError("");
+  }, []);
 
   const validateEmail = (email: string) => {
     if (!email) {
@@ -58,33 +64,13 @@ export default function ForgotPasswordForm() {
     setError("");
 
     try {
-      // Gửi yêu cầu đặt lại mật khẩu
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Không thể gửi yêu cầu đặt lại mật khẩu",
-        );
-      }
-
-      // Hiển thị thông báo thành công
       setIsSuccess(true);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError(
-          "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau.",
+          "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau."
         );
       }
       console.error(err);

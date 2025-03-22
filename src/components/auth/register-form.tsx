@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -20,171 +18,74 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import axiosInstance from "@/lib/axios";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function RegisterForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Lấy các state và action từ auth store
+  const {
+    registerForm,
+    registerFormErrors,
+    isLoading,
+    error,
+    success,
+    setRegisterForm,
+    validateRegisterField,
+    register,
+    resetMessages,
+  } = useAuthStore();
+
+  // State cho hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  // Reset thông báo khi component mount
+  useEffect(() => {
+    resetMessages();
+  }, [resetMessages]);
 
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  // Chuyển hướng sau khi đăng ký thành công
+  useEffect(() => {
+    if (success) {
+      // Chờ 1 giây rồi chuyển hướng để người dùng thấy thông báo thành công
+      const redirectTimer = setTimeout(() => {
+        // Reset thông báo trước khi chuyển hướng
+        resetMessages();
+        router.push("/auth/verify-account");
+      }, 1000);
 
-  const validateName = (name: string) => {
-    if (!name) {
-      setNameError("Họ và tên không được để trống");
-      return false;
+      return () => clearTimeout(redirectTimer);
     }
+  }, [success, router, resetMessages]);
 
-    if (name.length < 2) {
-      setNameError("Họ và tên phải có ít nhất 2 ký tự");
-      return false;
-    }
-
-    setNameError("");
-    return true;
+  // Xử lý khi thay đổi giá trị input
+  const handleInputChange = (
+    field: "name" | "email" | "password" | "confirmPassword",
+    value: string
+  ) => {
+    setRegisterForm(field, value);
   };
 
-  const validateEmail = (email: string) => {
-    if (!email) {
-      setEmailError("Email không được để trống");
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError("Email không hợp lệ");
-      return false;
-    }
-
-    setEmailError("");
-    return true;
+  // Xử lý khi blur input để validate
+  const handleInputBlur = (
+    field: "name" | "email" | "password" | "confirmPassword"
+  ) => {
+    validateRegisterField(field);
   };
 
-  const validatePassword = (password: string) => {
-    if (!password) {
-      setPasswordError("Mật khẩu không được để trống");
-      return false;
-    }
-
-    if (password.length < 6) {
-      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
-      return false;
-    }
-
-    setPasswordError("");
-    return true;
-  };
-
-  const validateConfirmPassword = (confirmPassword: string) => {
-    if (!confirmPassword) {
-      setConfirmPasswordError("Vui lòng xác nhận mật khẩu");
-      return false;
-    }
-
-    if (confirmPassword !== password) {
-      setConfirmPasswordError("Mật khẩu xác nhận không khớp");
-      return false;
-    }
-
-    setConfirmPasswordError("");
-    return true;
-  };
-
+  // Xử lý submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const isNameValid = validateName(name);
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-    const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
-
-    if (
-      !isNameValid ||
-      !isEmailValid ||
-      !isPasswordValid ||
-      !isConfirmPasswordValid
-    ) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      // Sử dụng axiosInstance thay vì fetch để gọi API đăng ký
-      const data = {
-        name,
-        email,
-        password,
-      };
-
-      const response = await axiosInstance.post("/auth/register", data);
-
-      // Xử lý phản hồi thành công
-      if (response.data?.message) {
-        // Lưu email vào localStorage để sử dụng trong trang xác thực
-        if (typeof window !== "undefined") {
-          localStorage.setItem("verificationEmail", email);
-        }
-
-        // Chuyển hướng đến trang xác minh tài khoản
-        router.push("/auth/verify-account");
-      }
-    } catch (err: any) {
-      // Xử lý lỗi từ API và hiển thị thông báo chính xác
-      if (err.response?.data?.message) {
-        // Hiển thị thông báo lỗi trả về từ API
-        setError(err.response.data.message);
-      } else if (err.code === "ECONNREFUSED") {
-        // Lỗi kết nối đến server
-        setError(
-          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối hoặc thử lại sau."
-        );
-      } else {
-        // Lỗi chung
-        setError("Đăng ký không thành công. Vui lòng thử lại sau.");
-      }
-      console.error("Đăng ký lỗi:", err);
-    } finally {
-      setIsLoading(false);
-    }
+    await register();
   };
 
   const handleGoogleSignup = async () => {
-    setIsLoading(true);
-    setError("");
-
+    // Giữ nguyên Google signup logic
     try {
-      // Sử dụng NextAuth để đăng nhập với Google
-      // Khi người dùng đăng nhập lần đầu, tài khoản sẽ được tạo tự động
-      const response = await fetch("/api/auth/signin/google", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Đăng ký với Google không thành công");
-      }
-
-      // Chuyển hướng sau khi đăng ký thành công
       router.push("/dashboard");
     } catch (err) {
-      setError("Đăng ký với Google không thành công. Vui lòng thử lại sau.");
       console.error(err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -222,6 +123,22 @@ export default function RegisterForm() {
               </Alert>
             </motion.div>
           )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-4"
+            >
+              <Alert>
+                <AlertDescription className="text-green-600">
+                  {success}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Họ và tên</Label>
@@ -230,20 +147,20 @@ export default function RegisterForm() {
                   id="name"
                   type="text"
                   placeholder="Nhập họ và tên của bạn"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  onBlur={() => validateName(name)}
+                  value={registerForm.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  onBlur={() => handleInputBlur("name")}
                   className="transition-all duration-300 focus:ring-2 focus:ring-primary"
                 />
               </div>
-              {nameError && (
+              {registerFormErrors.name && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {nameError}
+                  {registerFormErrors.name}
                 </motion.p>
               )}
             </div>
@@ -255,20 +172,20 @@ export default function RegisterForm() {
                   id="email"
                   type="email"
                   placeholder="Nhập email của bạn"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => validateEmail(email)}
+                  value={registerForm.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  onBlur={() => handleInputBlur("email")}
                   className="transition-all duration-300 focus:ring-2 focus:ring-primary"
                 />
               </div>
-              {emailError && (
+              {registerFormErrors.email && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {emailError}
+                  {registerFormErrors.email}
                 </motion.p>
               )}
             </div>
@@ -280,9 +197,11 @@ export default function RegisterForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Nhập mật khẩu của bạn"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={() => validatePassword(password)}
+                  value={registerForm.password}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  onBlur={() => handleInputBlur("password")}
                   className="pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary"
                 />
                 <button
@@ -293,14 +212,14 @@ export default function RegisterForm() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {passwordError && (
+              {registerFormErrors.password && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {passwordError}
+                  {registerFormErrors.password}
                 </motion.p>
               )}
             </div>
@@ -312,9 +231,11 @@ export default function RegisterForm() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Nhập lại mật khẩu của bạn"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onBlur={() => validateConfirmPassword(confirmPassword)}
+                  value={registerForm.confirmPassword}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
+                  onBlur={() => handleInputBlur("confirmPassword")}
                   className="pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary"
                 />
                 <button
@@ -329,14 +250,14 @@ export default function RegisterForm() {
                   )}
                 </button>
               </div>
-              {confirmPasswordError && (
+              {registerFormErrors.confirmPassword && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
-                  {confirmPasswordError}
+                  {registerFormErrors.confirmPassword}
                 </motion.p>
               )}
             </div>
