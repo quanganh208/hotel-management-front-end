@@ -47,6 +47,12 @@ export const authOptions: AuthOptions = {
           // Trả về đúng thông báo lỗi từ API nếu có
           if (error.response?.data) {
             const apiError = error.response.data as ApiError;
+
+            // Check for inactive account error
+            if (apiError.statusCode === 400 && apiError.message.includes("chưa được kích hoạt")) {
+              throw new Error("INACTIVE_ACCOUNT:" + apiError.message);
+            }
+
             throw new Error(apiError.message);
           }
 

@@ -78,7 +78,7 @@ interface AuthState {
   setVerificationCode: (code: string) => void;
   validateVerificationCode: () => boolean;
   verifyAccount: () => Promise<void>;
-  resendVerificationCode: () => Promise<void>;
+  verificationCode: () => Promise<void>;
 
   // Common actions
   setError: (error: string) => void;
@@ -137,7 +137,6 @@ const VALIDATION_ERRORS = {
   INVALID_CODE: "Mã xác thực chỉ được chứa các chữ số",
   INVALID_CODE_LENGTH: "Mã xác thực phải đủ 8 chữ số",
   MISSING_EMAIL: "Không tìm thấy email để xác thực",
-  RESEND_MISSING_EMAIL: "Không tìm thấy email để gửi lại mã xác thực",
 };
 
 // Lỗi API
@@ -149,15 +148,14 @@ const API_ERRORS = {
   GOOGLE_LOGIN_FAILED:
     "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
   VERIFY_FAILED: "Xác thực tài khoản không thành công. Vui lòng thử lại sau.",
-  RESEND_CODE_FAILED: "Không thể gửi lại mã xác thực. Vui lòng thử lại sau.",
+  CODE_FAILED: "Không thể gửi mã xác thực. Vui lòng thử lại sau.",
 };
 
 // Thông báo thành công
 const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: "Đăng nhập thành công",
   LOGOUT_SUCCESS: "Đăng xuất thành công",
-  RESEND_CODE_SUCCESS:
-    "Đã gửi lại mã xác thực, vui lòng kiểm tra email của bạn",
+  CODE_SUCCESS: "Đã gửi mã xác thực, vui lòng kiểm tra email của bạn",
 };
 
 // Tạo store với zustand
@@ -494,6 +492,20 @@ export const useAuthStore = create<AuthState>()(
           });
 
           if (result?.error) {
+            // Save the email for verification if it's an inactive account error
+            if (result.error.startsWith("INACTIVE_ACCOUNT:")) {
+              if (typeof window !== "undefined") {
+                localStorage.setItem("verificationEmail", loginForm.email);
+              }
+              // Also update the verification form email
+              set((state) => ({
+                verifyForm: {
+                  ...state.verifyForm,
+                  email: loginForm.email,
+                },
+              }));
+            }
+
             set(() => ({ error: result.error as string }));
             return false;
           }
@@ -598,28 +610,27 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      resendVerificationCode: async () => {
+      verificationCode: async () => {
         const { verifyForm } = get();
 
         if (!verifyForm.email) {
-          set(() => ({ error: VALIDATION_ERRORS.RESEND_MISSING_EMAIL }));
+          set(() => ({ error: VALIDATION_ERRORS.MISSING_EMAIL }));
           return;
         }
 
         set(() => ({ isLoading: true, error: "", success: "" }));
 
         try {
-          const response = await axiosInstance.post(
-            "/auth/resend-verification",
-            { email: verifyForm.email }
-          );
+          const response = await axiosInstance.post("/auth/send-activation", {
+            email: verifyForm.email,
+          });
 
           if (response.data?.message) {
-            set(() => ({ success: SUCCESS_MESSAGES.RESEND_CODE_SUCCESS }));
+            set(() => ({ success: SUCCESS_MESSAGES.CODE_SUCCESS }));
           }
           //eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
-          let errorMessage = API_ERRORS.RESEND_CODE_FAILED;
+          let errorMessage = API_ERRORS.CODE_FAILED;
 
           if (err.response?.data?.message) {
             errorMessage = err.response.data.message;

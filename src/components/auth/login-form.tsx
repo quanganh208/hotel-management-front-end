@@ -105,7 +105,21 @@ export default function LoginForm() {
               className="mb-4"
             >
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="flex flex-wrap items-center gap-1">
+                  {error.startsWith("INACTIVE_ACCOUNT:") ? (
+                    <>
+                      <span>{error.replace("INACTIVE_ACCOUNT:", "")}</span>
+                      <Link
+                        href="/auth/verify-account"
+                        className="text-primary font-medium hover:underline inline-flex items-center"
+                      >
+                        Kích hoạt tài khoản ngay
+                      </Link>
+                    </>
+                  ) : (
+                    error
+                  )}
+                </AlertDescription>
               </Alert>
             </motion.div>
           )}
