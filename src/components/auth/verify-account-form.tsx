@@ -1,12 +1,12 @@
 "use client";
 
-import React, {useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
-import {motion} from "framer-motion";
-import {Loader2} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,15 +15,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {Label} from "@/components/ui/label";
-import {Alert, AlertDescription} from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import {useAuthStore} from "@/store/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 
 // Thời gian đếm ngược (giây)
 const COUNTDOWN_TIME = 30;
@@ -57,12 +57,12 @@ export default function VerifyAccountForm() {
         const storedEmail = localStorage.getItem("verificationEmail");
         if (storedEmail) {
           // Cập nhật email trong store từ localStorage
-          const {setRegisterForm} = useAuthStore.getState();
+          const { setRegisterForm } = useAuthStore.getState();
           setRegisterForm("email", storedEmail);
           setIsChecking(false);
         } else {
           // Redirect ngay nếu không tìm thấy email
-          router.push('/');
+          router.push("/");
         }
       } else {
         setIsChecking(false);
@@ -153,16 +153,16 @@ export default function VerifyAccountForm() {
 
   return (
     <motion.div
-      initial={{opacity: 0, y: 20}}
-      animate={{opacity: 1, y: 0}}
-      transition={{duration: 0.5}}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
       <Card className="w-full">
         <CardHeader className="space-y-1">
           <motion.div
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            transition={{delay: 0.2, duration: 0.5}}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
             <CardTitle className="text-2xl font-bold text-center">
               Xác thực tài khoản
@@ -175,9 +175,9 @@ export default function VerifyAccountForm() {
         <CardContent className="space-y-4">
           {error && (
             <motion.div
-              initial={{opacity: 0, y: -20}}
-              animate={{opacity: 1, y: 0}}
-              transition={{duration: 0.3}}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               className="mb-4"
             >
               <Alert variant="destructive">
@@ -188,9 +188,9 @@ export default function VerifyAccountForm() {
 
           {success && (
             <motion.div
-              initial={{opacity: 0, y: -20}}
-              animate={{opacity: 1, y: 0}}
-              transition={{duration: 0.3}}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               className="mb-4"
             >
               <Alert>
@@ -204,7 +204,8 @@ export default function VerifyAccountForm() {
           {verifyForm.email ? (
             <div className="text-center mb-4">
               <p className="text-muted-foreground">
-                Chúng tôi {isSendingCode ? 'đang gửi' : 'đã gửi'} mã xác thực đến
+                Chúng tôi {isSendingCode ? "đang gửi" : "đã gửi"} mã xác thực
+                đến
               </p>
               <p className="font-medium">{verifyForm.email}</p>
             </div>
@@ -226,24 +227,24 @@ export default function VerifyAccountForm() {
                 className="flex justify-center"
               >
                 <InputOTPGroup>
-                  <InputOTPSlot index={0} className="h-12"/>
-                  <InputOTPSlot index={1} className="h-12"/>
-                  <InputOTPSlot index={2} className="h-12"/>
-                  <InputOTPSlot index={3} className="h-12"/>
+                  <InputOTPSlot index={0} className="h-12" />
+                  <InputOTPSlot index={1} className="h-12" />
+                  <InputOTPSlot index={2} className="h-12" />
+                  <InputOTPSlot index={3} className="h-12" />
                 </InputOTPGroup>
-                <InputOTPSeparator/>
+                <InputOTPSeparator />
                 <InputOTPGroup>
-                  <InputOTPSlot index={4} className="h-12"/>
-                  <InputOTPSlot index={5} className="h-12"/>
-                  <InputOTPSlot index={6} className="h-12"/>
-                  <InputOTPSlot index={7} className="h-12"/>
+                  <InputOTPSlot index={4} className="h-12" />
+                  <InputOTPSlot index={5} className="h-12" />
+                  <InputOTPSlot index={6} className="h-12" />
+                  <InputOTPSlot index={7} className="h-12" />
                 </InputOTPGroup>
               </InputOTP>
               {verifyFormError && (
                 <motion.p
-                  initial={{opacity: 0, height: 0}}
-                  animate={{opacity: 1, height: "auto"}}
-                  exit={{opacity: 0, height: 0}}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
                   className="text-sm font-medium text-destructive"
                 >
                   {verifyFormError}
@@ -251,10 +252,14 @@ export default function VerifyAccountForm() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading || isSendingCode}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || isSendingCode}
+            >
               {isLoading && !isSendingCode ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Đang xác thực...
                 </>
               ) : (

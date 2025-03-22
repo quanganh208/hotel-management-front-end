@@ -20,7 +20,7 @@ export const authOptions: AuthOptions = {
         try {
           const response = await authService.login(
             credentials.email,
-            credentials.password
+            credentials.password,
           );
 
           if (response && response.access_token) {
@@ -40,7 +40,7 @@ export const authOptions: AuthOptions = {
           // Xử lý lỗi kết nối
           if (error.code === "ECONNREFUSED") {
             throw new Error(
-              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
+              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
             );
           }
 
@@ -49,7 +49,10 @@ export const authOptions: AuthOptions = {
             const apiError = error.response.data as ApiError;
 
             // Check for inactive account error
-            if (apiError.statusCode === 400 && apiError.message.includes("chưa được kích hoạt")) {
+            if (
+              apiError.statusCode === 400 &&
+              apiError.message.includes("chưa được kích hoạt")
+            ) {
               throw new Error("INACTIVE_ACCOUNT:" + apiError.message);
             }
 
@@ -108,7 +111,7 @@ export const authService = {
 
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/login",
-        data
+        data,
       );
 
       return response.data;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import {getSession} from "next-auth/react";
+import { getSession } from "next-auth/react";
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
@@ -21,7 +21,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add a response interceptor
@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("token");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

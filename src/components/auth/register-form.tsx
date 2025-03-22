@@ -62,14 +62,14 @@ export default function RegisterForm() {
   // Xử lý khi thay đổi giá trị input
   const handleInputChange = (
     field: "name" | "email" | "password" | "confirmPassword",
-    value: string
+    value: string,
   ) => {
     setRegisterForm(field, value);
   };
 
   // Xử lý khi blur input để validate
   const handleInputBlur = (
-    field: "name" | "email" | "password" | "confirmPassword"
+    field: "name" | "email" | "password" | "confirmPassword",
   ) => {
     validateRegisterField(field);
   };

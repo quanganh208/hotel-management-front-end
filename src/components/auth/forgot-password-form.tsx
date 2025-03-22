@@ -70,7 +70,7 @@ export default function ForgotPasswordForm() {
         setError(err.message);
       } else {
         setError(
-          "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau."
+          "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau.",
         );
       }
       console.error(err);
