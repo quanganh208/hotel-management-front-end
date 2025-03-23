@@ -52,7 +52,14 @@ export default function LoginForm() {
 
       if (errorParam) {
         const decodedError = decodeURIComponent(errorParam);
-        setError(decodedError);
+
+        if (decodedError === "OAuthCallback") {
+          setError(
+            "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
+          );
+        } else if (decodedError !== "Callback") {
+          setError(decodedError);
+        }
 
         // Xóa param error khỏi URL để không hiển thị trong địa chỉ
         url.searchParams.delete("error");
