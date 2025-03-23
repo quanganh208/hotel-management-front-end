@@ -356,7 +356,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateRegisterField(field)
+          get().validateRegisterField(field),
         );
         return results.every((result) => result === true);
       },
@@ -875,7 +875,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateResetPasswordField(field)
+          get().validateResetPasswordField(field),
         );
         return results.every((result) => result === true);
       },
@@ -958,6 +958,6 @@ export const useAuthStore = create<AuthState>()(
           confirmPassword: "",
         },
       }),
-    }
-  )
+    },
+  ),
 );

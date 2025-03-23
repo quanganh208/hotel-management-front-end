@@ -87,14 +87,14 @@ export default function RegisterForm() {
   // Xử lý khi thay đổi giá trị input
   const handleInputChange = (
     field: "name" | "email" | "password" | "confirmPassword",
-    value: string
+    value: string,
   ) => {
     setRegisterForm(field, value);
   };
 
   // Xử lý khi blur input để validate
   const handleInputBlur = (
-    field: "name" | "email" | "password" | "confirmPassword"
+    field: "name" | "email" | "password" | "confirmPassword",
   ) => {
     validateRegisterField(field);
   };
@@ -124,7 +124,7 @@ export default function RegisterForm() {
         router.refresh();
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch ( error ) {
+    } catch (error) {
       setError("Đăng nhập với Google không thành công. Vui lòng thử lại sau.");
     }
   };

@@ -55,7 +55,7 @@ export default function LoginForm() {
 
         if (decodedError === "OAuthCallback") {
           setError(
-            "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
+            "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
           );
         } else if (decodedError !== "Callback") {
           setError(decodedError);
