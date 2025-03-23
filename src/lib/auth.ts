@@ -73,15 +73,7 @@ export const authOptions: AuthOptions = {
       // Xử lý khi người dùng đăng nhập bằng Google
       if (account?.provider === "google" && profile?.email) {
         try {
-          // Lấy ảnh từ profile Google
-          const imageUrl = profile.picture || undefined;
-
-          const response = await authService.googleAuth(
-            profile.email,
-            profile.name || "",
-            profile.sub || "",
-            imageUrl
-          );
+          const response = await authService.googleAuth(account.id_token!);
 
           if (response.access_token) {
             account.access_token = response.access_token;
@@ -174,22 +166,12 @@ export const authService = {
   },
 
   async googleAuth(
-    email: string,
-    name: string,
-    googleId: string,
-    image?: string
+    idToken : string
   ): Promise<LoginResponse> {
     try {
-      const data = {
-        email,
-        name,
-        googleId,
-        ...(image && { image }), // Chỉ thêm trường image nếu có giá trị
-      };
-
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/google-auth",
-        data
+        {idToken}
       );
 
       return response.data;
