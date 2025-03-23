@@ -94,7 +94,7 @@ interface AuthState {
   validateAllLoginFields: () => boolean;
   resetLoginForm: () => void;
   login: () => Promise<boolean>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
 
   // Form actions - Verification
@@ -356,7 +356,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateRegisterField(field),
+          get().validateRegisterField(field)
         );
         return results.every((result) => result === true);
       },
@@ -528,7 +528,6 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set(() => ({ error: errorMessage }));
-          console.error("Đăng ký lỗi:", err);
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -576,7 +575,6 @@ export const useAuthStore = create<AuthState>()(
             err instanceof Error ? err.message : API_ERRORS.LOGIN_FAILED;
 
           set(() => ({ error: errorMessage }));
-          console.error("Đăng nhập lỗi:", err);
           return false;
         } finally {
           set(() => ({ isLoading: false }));
@@ -587,13 +585,42 @@ export const useAuthStore = create<AuthState>()(
         set(() => ({ isLoading: true, error: "", success: "" }));
 
         try {
-          await signIn("google", { callbackUrl: "/dashboard" });
-        } catch (err) {
+          const result = await signIn("google", {
+            redirect: false,
+            callbackUrl: "/dashboard",
+          });
+
+          if (result?.error) {
+            set(() => ({ error: result.error as string }));
+            return false;
+          }
+
+          set(() => ({ success: SUCCESS_MESSAGES.LOGIN_SUCCESS }));
+          return true;
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          // Xử lý lỗi từ URL error param nếu có
+          if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            const errorParam = url.searchParams.get("error");
+
+            if (errorParam) {
+              const decodedError = decodeURIComponent(errorParam);
+              set(() => ({ error: decodedError }));
+
+              // Xóa param error khỏi URL để không hiển thị trong địa chỉ
+              url.searchParams.delete("error");
+              window.history.replaceState({}, document.title, url.toString());
+
+              return false;
+            }
+          }
+
           const errorMessage =
             err instanceof Error ? err.message : API_ERRORS.GOOGLE_LOGIN_FAILED;
 
           set(() => ({ error: errorMessage }));
-          console.error("Đăng nhập Google lỗi:", err);
+          return false;
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -610,8 +637,6 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             success: SUCCESS_MESSAGES.LOGOUT_SUCCESS,
           }));
-        } catch (err) {
-          console.error("Đăng xuất lỗi:", err);
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -662,7 +687,6 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set(() => ({ error: errorMessage }));
-          console.error("Lỗi xác thực:", err);
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -695,7 +719,6 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set(() => ({ error: errorMessage }));
-          console.error("Lỗi gửi lại mã:", err);
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -767,7 +790,6 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set(() => ({ error: errorMessage }));
-          console.error("Lỗi quên mật khẩu:", err);
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -853,7 +875,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateResetPasswordField(field),
+          get().validateResetPasswordField(field)
         );
         return results.every((result) => result === true);
       },
@@ -890,7 +912,6 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set(() => ({ error: errorMessage }));
-          console.error("Lỗi đặt lại mật khẩu:", err);
         } finally {
           set(() => ({ isLoading: false }));
         }
@@ -937,6 +958,6 @@ export const useAuthStore = create<AuthState>()(
           confirmPassword: "",
         },
       }),
-    },
-  ),
+    }
+  )
 );

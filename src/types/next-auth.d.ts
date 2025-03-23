@@ -1,5 +1,6 @@
 import "next-auth";
 import "next-auth/jwt";
+import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
   interface User {
@@ -14,7 +15,14 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       accessToken: string;
-    };
+      provider?: string;
+    } & DefaultSession["user"];
+  }
+
+  // Bổ sung thuộc tính cho Google Profile
+  interface Profile {
+    picture?: string;
+    sub?: string;
   }
 }
 
@@ -22,22 +30,18 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     accessToken: string;
+    provider?: string;
   }
 }
 
 export interface LoginResponse {
-  message: string;
-  access_token: string;
-  token_type: string;
-  expires_in: string;
   _id: string;
   name: string;
   email: string;
-  accountType: string;
+  access_token: string;
 }
 
 export interface ApiError {
-  message: string;
-  error: string;
   statusCode: number;
+  message: string;
 }

@@ -35,15 +35,39 @@ export default function LoginForm() {
     login,
     loginWithGoogle,
     resetMessages,
+    setError,
   } = useAuthStore();
 
   // State cho hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false);
 
-  // Reset thông báo khi component mount
+  // Reset thông báo khi component mount và kiểm tra lỗi từ URL
   useEffect(() => {
     resetMessages();
-  }, [resetMessages]);
+
+    // Kiểm tra lỗi từ URL parameters
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      const errorParam = url.searchParams.get("error");
+
+      if (errorParam) {
+        const decodedError = decodeURIComponent(errorParam);
+        setError(decodedError);
+
+        // Xóa param error khỏi URL để không hiển thị trong địa chỉ
+        url.searchParams.delete("error");
+        url.searchParams.delete("callbackUrl"); // Xóa cả callbackUrl nếu có
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+  }, [resetMessages, setError]);
+
+  // Tự động cuộn lên đầu khi có lỗi xuất hiện
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [error]);
 
   // Xử lý khi thay đổi giá trị input
   const handleInputChange = (field: "email" | "password", value: string) => {
@@ -71,7 +95,13 @@ export default function LoginForm() {
   };
 
   const handleGoogleLogin = async () => {
-    await loginWithGoogle();
+    const loginSuccess = await loginWithGoogle();
+
+    if (loginSuccess) {
+      resetMessages();
+      router.push("/dashboard");
+      router.refresh();
+    }
   };
 
   return (

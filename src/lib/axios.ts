@@ -21,28 +21,15 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 // Add a response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Log chi tiết lỗi để debug
-    console.error("API error:", {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      message: error.message,
-      code: error.code,
-    });
-
-    if (error.response?.status === 401 && typeof window !== "undefined") {
-      // Handle unauthorized error (e.g., redirect to login)
-      localStorage.removeItem("token");
-    }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default axiosInstance;

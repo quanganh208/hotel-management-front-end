@@ -10,6 +10,7 @@ const publicRoutes = [
   "/auth/forgot-password",
   "/auth/reset-password",
   "/auth/verify-account",
+  "/auth/error",
 ];
 
 // Danh sách các API routes không cần xác thực

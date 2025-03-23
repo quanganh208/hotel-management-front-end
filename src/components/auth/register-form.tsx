@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,16 +35,40 @@ export default function RegisterForm() {
     validateRegisterField,
     register,
     resetMessages,
+    setError,
   } = useAuthStore();
 
   // State cho hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Reset thông báo khi component mount
+  // Reset thông báo khi component mount và kiểm tra lỗi từ URL
   useEffect(() => {
     resetMessages();
-  }, [resetMessages]);
+
+    // Kiểm tra lỗi từ URL parameters
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      const errorParam = url.searchParams.get("error");
+
+      if (errorParam) {
+        const decodedError = decodeURIComponent(errorParam);
+        setError(decodedError);
+
+        // Xóa param error khỏi URL để không hiển thị trong địa chỉ
+        url.searchParams.delete("error");
+        url.searchParams.delete("callbackUrl"); // Xóa cả callbackUrl nếu có
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+  }, [resetMessages, setError]);
+
+  // Tự động cuộn lên đầu khi có lỗi xuất hiện
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [error]);
 
   // Chuyển hướng sau khi đăng ký thành công
   useEffect(() => {
@@ -62,14 +87,14 @@ export default function RegisterForm() {
   // Xử lý khi thay đổi giá trị input
   const handleInputChange = (
     field: "name" | "email" | "password" | "confirmPassword",
-    value: string,
+    value: string
   ) => {
     setRegisterForm(field, value);
   };
 
   // Xử lý khi blur input để validate
   const handleInputBlur = (
-    field: "name" | "email" | "password" | "confirmPassword",
+    field: "name" | "email" | "password" | "confirmPassword"
   ) => {
     validateRegisterField(field);
   };
@@ -81,11 +106,26 @@ export default function RegisterForm() {
   };
 
   const handleGoogleSignup = async () => {
-    // Giữ nguyên Google signup logic
+    // Sử dụng Next Auth signIn cho Google
     try {
-      router.push("/dashboard");
-    } catch (err) {
-      console.error(err);
+      resetMessages();
+      const result = await signIn("google", {
+        redirect: false,
+        callbackUrl: "/dashboard",
+      });
+
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+
+      if (result?.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch ( error ) {
+      setError("Đăng nhập với Google không thành công. Vui lòng thử lại sau.");
     }
   };
 
@@ -314,7 +354,7 @@ export default function RegisterForm() {
                   ></path>
                 </svg>
               )}
-              Đăng ký với Google
+              Đăng nhập với Google
             </Button>
           </motion.div>
         </CardContent>
