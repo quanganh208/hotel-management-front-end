@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -20,63 +20,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Lấy các state và action từ auth store
+  const {
+    forgotPasswordForm,
+    forgotPasswordFormError,
+    isLoading,
+    error,
+    success,
+    setForgotPasswordEmail,
+    validateForgotPasswordEmail,
+    forgotPassword,
+    resetMessages,
+  } = useAuthStore();
 
   // Reset error message khi component mount
   useEffect(() => {
-    setError("");
-    setEmailError("");
-  }, []);
+    resetMessages();
+  }, [resetMessages]);
 
-  const validateEmail = (email: string) => {
-    if (!email) {
-      setEmailError("Email không được để trống");
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError("Email không hợp lệ");
-      return false;
-    }
-
-    setEmailError("");
-    return true;
-  };
-
+  // Xử lý gửi form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isEmailValid = validateEmail(email);
-
-    if (!isEmailValid) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      setIsSuccess(true);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(
-          "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau.",
-        );
-      }
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    // Gọi API quên mật khẩu
+    await forgotPassword();
   };
 
   return (
@@ -114,7 +86,7 @@ export default function ForgotPasswordForm() {
             </motion.div>
           )}
 
-          {isSuccess ? (
+          {success ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -125,8 +97,9 @@ export default function ForgotPasswordForm() {
                 <CheckCircle2 className="h-16 w-16 text-primary" />
                 <h3 className="text-xl font-semibold">Yêu cầu đã được gửi!</h3>
                 <p className="text-muted-foreground">
-                  Chúng tôi đã gửi email hướng dẫn đặt lại mật khẩu đến {email}.
-                  Vui lòng kiểm tra hộp thư đến của bạn.
+                  Chúng tôi đã gửi email đặt lại mật khẩu đến{" "}
+                  <strong>{forgotPasswordForm.email}</strong>. Vui lòng kiểm tra
+                  hộp thư đến của bạn.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Nếu bạn không nhận được email trong vòng vài phút, hãy kiểm
@@ -140,7 +113,7 @@ export default function ForgotPasswordForm() {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => router.push("/login")}
+                  onClick={() => router.push("/auth/login")}
                 >
                   Quay lại đăng nhập
                 </Button>
@@ -155,20 +128,20 @@ export default function ForgotPasswordForm() {
                     id="email"
                     type="email"
                     placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={() => validateEmail(email)}
+                    value={forgotPasswordForm.email}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    onBlur={validateForgotPasswordEmail}
                     className="transition-all duration-300 focus:ring-2 focus:ring-primary"
                   />
                 </div>
-                {emailError && (
+                {forgotPasswordFormError && (
                   <motion.p
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="text-sm font-medium text-destructive"
                   >
-                    {emailError}
+                    {forgotPasswordFormError}
                   </motion.p>
                 )}
               </div>
@@ -191,7 +164,7 @@ export default function ForgotPasswordForm() {
             </form>
           )}
         </CardContent>
-        {!isSuccess && (
+        {!success && (
           <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
               Nhớ mật khẩu?{" "}

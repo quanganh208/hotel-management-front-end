@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuthStore } from "@/store/auth-store";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -27,90 +28,40 @@ interface ResetPasswordFormProps {
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Lấy các state và action từ auth store
+  const {
+    resetPasswordForm,
+    resetPasswordFormErrors,
+    isLoading,
+    error,
+    success,
+    setResetPasswordForm,
+    validateResetPasswordField,
+    resetPassword,
+    resetMessages,
+  } = useAuthStore();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const validatePassword = (password: string) => {
-    if (!password) {
-      setPasswordError("Mật khẩu không được để trống");
-      return false;
+  // Reset error message và cập nhật token khi component mount
+  useEffect(() => {
+    resetMessages();
+    setResetPasswordForm("token", token);
+  }, [resetMessages, setResetPasswordForm, token]);
+
+  // Thiết lập trạng thái thành công khi có thông báo thành công
+  useEffect(() => {
+    if (success) {
+      setIsSuccess(true);
     }
-
-    if (password.length < 6) {
-      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
-      return false;
-    }
-
-    setPasswordError("");
-    return true;
-  };
-
-  const validateConfirmPassword = (confirmPassword: string) => {
-    if (!confirmPassword) {
-      setConfirmPasswordError("Vui lòng xác nhận mật khẩu");
-      return false;
-    }
-
-    if (confirmPassword !== password) {
-      setConfirmPasswordError("Mật khẩu xác nhận không khớp");
-      return false;
-    }
-
-    setConfirmPasswordError("");
-    return true;
-  };
+  }, [success]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const isPasswordValid = validatePassword(password);
-    const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
-
-    if (!isPasswordValid || !isConfirmPasswordValid) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      // Gửi yêu cầu đặt lại mật khẩu
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token,
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Không thể đặt lại mật khẩu");
-      }
-
-      // Hiển thị thông báo thành công
-      setIsSuccess(true);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Không thể đặt lại mật khẩu. Vui lòng thử lại sau.");
-      }
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    await resetPassword();
   };
 
   return (
@@ -171,7 +122,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               >
                 <Button
                   className="w-full"
-                  onClick={() => router.push("/login")}
+                  onClick={() => router.push("/auth/login")}
                 >
                   Đăng nhập
                 </Button>
@@ -186,9 +137,11 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={() => validatePassword(password)}
+                    value={resetPasswordForm.newPassword}
+                    onChange={(e) =>
+                      setResetPasswordForm("newPassword", e.target.value)
+                    }
+                    onBlur={() => validateResetPasswordField("newPassword")}
                     className="pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary"
                   />
                   <button
@@ -199,14 +152,14 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {passwordError && (
+                {resetPasswordFormErrors.newPassword && (
                   <motion.p
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="text-sm font-medium text-destructive"
                   >
-                    {passwordError}
+                    {resetPasswordFormErrors.newPassword}
                   </motion.p>
                 )}
               </div>
@@ -218,9 +171,11 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    onBlur={() => validateConfirmPassword(confirmPassword)}
+                    value={resetPasswordForm.confirmPassword}
+                    onChange={(e) =>
+                      setResetPasswordForm("confirmPassword", e.target.value)
+                    }
+                    onBlur={() => validateResetPasswordField("confirmPassword")}
                     className="pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary"
                   />
                   <button
@@ -235,14 +190,14 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                     )}
                   </button>
                 </div>
-                {confirmPasswordError && (
+                {resetPasswordFormErrors.confirmPassword && (
                   <motion.p
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="text-sm font-medium text-destructive"
                   >
-                    {confirmPasswordError}
+                    {resetPasswordFormErrors.confirmPassword}
                   </motion.p>
                 )}
               </div>

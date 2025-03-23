@@ -41,6 +41,23 @@ interface VerifyForm {
   verificationCode: string;
 }
 
+// Thêm interface ForgotPasswordForm
+interface ForgotPasswordForm {
+  email: string;
+}
+
+// Thêm interface ResetPasswordForm
+interface ResetPasswordForm {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface ResetPasswordFormErrors {
+  newPassword: string;
+  confirmPassword: string;
+}
+
 // Interface chính cho AuthState
 interface AuthState {
   // User state
@@ -57,6 +74,12 @@ interface AuthState {
   loginFormErrors: LoginFormErrors;
   verifyForm: VerifyForm;
   verifyFormError: string;
+  // Thêm state cho form quên mật khẩu
+  forgotPasswordForm: ForgotPasswordForm;
+  forgotPasswordFormError: string;
+  // Thêm state cho form đặt lại mật khẩu
+  resetPasswordForm: ResetPasswordForm;
+  resetPasswordFormErrors: ResetPasswordFormErrors;
 
   // Form actions - Register
   setRegisterForm: (field: keyof RegisterForm, value: string) => void;
@@ -79,6 +102,19 @@ interface AuthState {
   validateVerificationCode: () => boolean;
   verifyAccount: () => Promise<void>;
   verificationCode: () => Promise<void>;
+
+  // Form actions - Forgot Password
+  setForgotPasswordEmail: (email: string) => void;
+  validateForgotPasswordEmail: () => boolean;
+  resetForgotPasswordForm: () => void;
+  forgotPassword: () => Promise<void>;
+
+  // Form actions - Reset Password
+  setResetPasswordForm: (field: keyof ResetPasswordForm, value: string) => void;
+  validateResetPasswordField: (field: keyof ResetPasswordForm) => boolean;
+  validateAllResetPasswordFields: () => boolean;
+  resetResetPasswordForm: () => void;
+  resetPassword: () => Promise<void>;
 
   // Common actions
   setError: (error: string) => void;
@@ -121,6 +157,21 @@ const initialState = {
     verificationCode: "",
   },
   verifyFormError: "",
+  // Thêm state cho form quên mật khẩu
+  forgotPasswordForm: {
+    email: "",
+  },
+  forgotPasswordFormError: "",
+  // Thêm state cho form đặt lại mật khẩu
+  resetPasswordForm: {
+    token: "",
+    newPassword: "",
+    confirmPassword: "",
+  },
+  resetPasswordFormErrors: {
+    newPassword: "",
+    confirmPassword: "",
+  },
 };
 
 // Lỗi validation
@@ -149,6 +200,10 @@ const API_ERRORS = {
     "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
   VERIFY_FAILED: "Xác thực tài khoản không thành công. Vui lòng thử lại sau.",
   CODE_FAILED: "Không thể gửi mã xác thực. Vui lòng thử lại sau.",
+  FORGOT_PASSWORD_FAILED:
+    "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau.",
+  RESET_PASSWORD_FAILED:
+    "Không thể đặt lại mật khẩu. Token không hợp lệ hoặc đã hết hạn.",
 };
 
 // Thông báo thành công
@@ -156,6 +211,9 @@ const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: "Đăng nhập thành công",
   LOGOUT_SUCCESS: "Đăng xuất thành công",
   CODE_SUCCESS: "Đã gửi mã xác thực, vui lòng kiểm tra email của bạn",
+  FORGOT_PASSWORD_SUCCESS:
+    "Đã gửi email hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn.",
+  RESET_PASSWORD_SUCCESS: "Đặt lại mật khẩu thành công",
 };
 
 // Tạo store với zustand
@@ -643,6 +701,201 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // --- FORM ACTIONS: FORGOT PASSWORD ---
+      setForgotPasswordEmail: (email) => {
+        set((state) => ({
+          forgotPasswordForm: {
+            ...state.forgotPasswordForm,
+            email,
+          },
+        }));
+      },
+
+      validateForgotPasswordEmail: () => {
+        const { forgotPasswordForm } = get();
+        let isValid = false;
+
+        if (!forgotPasswordForm.email) {
+          set(() => ({
+            forgotPasswordFormError: VALIDATION_ERRORS.EMPTY_EMAIL,
+          }));
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(forgotPasswordForm.email)) {
+            set(() => ({
+              forgotPasswordFormError: VALIDATION_ERRORS.INVALID_EMAIL,
+            }));
+          } else {
+            set(() => ({
+              forgotPasswordFormError: "",
+            }));
+            isValid = true;
+          }
+        }
+
+        return isValid;
+      },
+
+      resetForgotPasswordForm: () => {
+        set(() => ({
+          forgotPasswordForm: initialState.forgotPasswordForm,
+          forgotPasswordFormError: "",
+        }));
+      },
+
+      forgotPassword: async () => {
+        const { forgotPasswordForm, validateForgotPasswordEmail } = get();
+
+        if (!validateForgotPasswordEmail()) return;
+
+        set(() => ({ isLoading: true, error: "", success: "" }));
+
+        try {
+          const response = await axiosInstance.post("/auth/forgot-password", {
+            email: forgotPasswordForm.email,
+          });
+
+          if (response.data?.message) {
+            set(() => ({ success: SUCCESS_MESSAGES.FORGOT_PASSWORD_SUCCESS }));
+          }
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          let errorMessage = API_ERRORS.FORGOT_PASSWORD_FAILED;
+
+          if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+
+          set(() => ({ error: errorMessage }));
+          console.error("Lỗi quên mật khẩu:", err);
+        } finally {
+          set(() => ({ isLoading: false }));
+        }
+      },
+
+      // --- FORM ACTIONS: RESET PASSWORD ---
+      setResetPasswordForm: (field, value) => {
+        set((state) => ({
+          resetPasswordForm: {
+            ...state.resetPasswordForm,
+            [field]: value,
+          },
+        }));
+      },
+
+      validateResetPasswordField: (field) => {
+        const { resetPasswordForm } = get();
+        let isValid = false;
+
+        switch (field) {
+          case "newPassword":
+            if (!resetPasswordForm.newPassword) {
+              set((state) => ({
+                resetPasswordFormErrors: {
+                  ...state.resetPasswordFormErrors,
+                  newPassword: VALIDATION_ERRORS.EMPTY_PASSWORD,
+                },
+              }));
+            } else if (resetPasswordForm.newPassword.length < 6) {
+              set((state) => ({
+                resetPasswordFormErrors: {
+                  ...state.resetPasswordFormErrors,
+                  newPassword: VALIDATION_ERRORS.SHORT_PASSWORD,
+                },
+              }));
+            } else {
+              set((state) => ({
+                resetPasswordFormErrors: {
+                  ...state.resetPasswordFormErrors,
+                  newPassword: "",
+                },
+              }));
+              isValid = true;
+            }
+            break;
+
+          case "confirmPassword":
+            if (!resetPasswordForm.confirmPassword) {
+              set((state) => ({
+                resetPasswordFormErrors: {
+                  ...state.resetPasswordFormErrors,
+                  confirmPassword: VALIDATION_ERRORS.EMPTY_CONFIRM,
+                },
+              }));
+            } else if (
+              resetPasswordForm.confirmPassword !==
+              resetPasswordForm.newPassword
+            ) {
+              set((state) => ({
+                resetPasswordFormErrors: {
+                  ...state.resetPasswordFormErrors,
+                  confirmPassword: VALIDATION_ERRORS.MISMATCH_PASSWORD,
+                },
+              }));
+            } else {
+              set((state) => ({
+                resetPasswordFormErrors: {
+                  ...state.resetPasswordFormErrors,
+                  confirmPassword: "",
+                },
+              }));
+              isValid = true;
+            }
+            break;
+        }
+
+        return isValid;
+      },
+
+      validateAllResetPasswordFields: () => {
+        const fields: (keyof ResetPasswordForm)[] = [
+          "newPassword",
+          "confirmPassword",
+        ];
+        const results = fields.map((field) =>
+          get().validateResetPasswordField(field),
+        );
+        return results.every((result) => result === true);
+      },
+
+      resetResetPasswordForm: () => {
+        set(() => ({
+          resetPasswordForm: initialState.resetPasswordForm,
+          resetPasswordFormErrors: initialState.resetPasswordFormErrors,
+        }));
+      },
+
+      resetPassword: async () => {
+        const { resetPasswordForm, validateAllResetPasswordFields } = get();
+
+        if (!validateAllResetPasswordFields()) return;
+
+        set(() => ({ isLoading: true, error: "", success: "" }));
+
+        try {
+          const response = await axiosInstance.post("/auth/reset-password", {
+            token: resetPasswordForm.token,
+            newPassword: resetPasswordForm.newPassword,
+          });
+
+          if (response.data?.message) {
+            set(() => ({ success: SUCCESS_MESSAGES.RESET_PASSWORD_SUCCESS }));
+          }
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          let errorMessage = API_ERRORS.RESET_PASSWORD_FAILED;
+
+          if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+
+          set(() => ({ error: errorMessage }));
+          console.error("Lỗi đặt lại mật khẩu:", err);
+        } finally {
+          set(() => ({ isLoading: false }));
+        }
+      },
+
       // --- COMMON ACTIONS ---
       setError: (error) => set(() => ({ error })),
       setSuccess: (success) => set(() => ({ success })),
@@ -651,6 +904,11 @@ export const useAuthStore = create<AuthState>()(
           error: "",
           success: "",
           verifyFormError: "",
+          forgotPasswordFormError: "",
+          resetPasswordFormErrors: {
+            newPassword: "",
+            confirmPassword: "",
+          },
         })),
     }),
     {
@@ -665,6 +923,19 @@ export const useAuthStore = create<AuthState>()(
         error: "",
         success: "",
         verifyFormError: "",
+        forgotPasswordForm: {
+          email: state.forgotPasswordForm.email,
+        },
+        forgotPasswordFormError: "",
+        resetPasswordForm: {
+          token: "",
+          newPassword: "",
+          confirmPassword: "",
+        },
+        resetPasswordFormErrors: {
+          newPassword: "",
+          confirmPassword: "",
+        },
       }),
     },
   ),
