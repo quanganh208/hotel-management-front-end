@@ -68,6 +68,14 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        collapse: {
+          from: { height: "var(--radix-collapsible-content-height)" },
+          to: { height: 0 },
+        },
+        expand: {
+          from: { height: 0 },
+          to: { height: "var(--radix-collapsible-content-height)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

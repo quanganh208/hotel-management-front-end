@@ -1,4 +1,3 @@
-import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { AuthOptions } from "next-auth";
@@ -21,7 +20,7 @@ export const authOptions: AuthOptions = {
         try {
           const response = await authService.login(
             credentials.email,
-            credentials.password,
+            credentials.password
           );
 
           if (response && response.access_token) {
@@ -39,7 +38,7 @@ export const authOptions: AuthOptions = {
           // Xử lý lỗi kết nối
           if (error.code === "ECONNREFUSED") {
             throw new Error(
-              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
+              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
             );
           }
 
@@ -139,12 +138,6 @@ export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET, // Đặt trong .env
 };
 
-// Fix: Use the correct export pattern for NextAuth.js with App Router
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
-export const { auth, signIn, signOut } = handler;
-
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
     try {
@@ -155,7 +148,7 @@ export const authService = {
 
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/login",
-        data,
+        data
       );
 
       return response.data;
@@ -169,7 +162,7 @@ export const authService = {
     try {
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/google-auth",
-        { idToken },
+        { idToken }
       );
 
       return response.data;
@@ -177,7 +170,7 @@ export const authService = {
     } catch (error: any) {
       if (error.code === "ECONNREFUSED") {
         throw new Error(
-          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
+          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
         );
       }
 
@@ -189,14 +182,8 @@ export const authService = {
 
       // Lỗi mặc định
       throw new Error(
-        "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
+        "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
       );
-    }
-  },
-
-  async logout() {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("userData");
     }
   },
 };

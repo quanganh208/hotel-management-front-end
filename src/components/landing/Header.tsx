@@ -10,9 +10,24 @@ import {
   SheetClose,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useSession, signOut } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+  };
 
   const navItems = [
     { name: "Trang chủ", href: "#" },
@@ -61,16 +76,92 @@ export default function Header() {
 
         {/* Desktop Buttons */}
         <div className="hidden lg:flex items-center gap-4">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button asChild variant="outline">
-              <Link href="/auth/login">Đăng nhập</Link>
-            </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button asChild>
-              <Link href="/auth/register">Dùng thử miễn phí</Link>
-            </Button>
-          </motion.div>
+          {session ? (
+            <>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button asChild variant="outline">
+                  <Link href="/dashboard">Trang chủ</Link>
+                </Button>
+              </motion.div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={session.user.image || "/placeholder-user.jpg"}
+                        alt={session.user.name || "Người dùng"}
+                      />
+                      <AvatarFallback>
+                        {session.user.name
+                          ? session.user.name.substring(0, 2).toUpperCase()
+                          : "ND"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {session.user.name || "Người dùng"}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {session.user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link
+                      href="/dashboard"
+                      className="flex w-full items-center"
+                    >
+                      Trang chủ
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/profile" className="flex w-full items-center">
+                      Tài khoản
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center cursor-pointer"
+                    >
+                      Đăng xuất
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button asChild variant="outline">
+                  <Link href="/auth/login">Đăng nhập</Link>
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button asChild>
+                  <Link href="/auth/register">Dùng thử miễn phí</Link>
+                </Button>
+              </motion.div>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -100,20 +191,84 @@ export default function Header() {
                   ))}
                 </nav>
                 <div className="flex flex-col gap-4 mt-4">
-                  <SheetClose asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => setOpen(false)}
-                    >
-                      Đăng nhập
-                    </Button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Button className="w-full" onClick={() => setOpen(false)}>
-                      Dùng thử miễn phí
-                    </Button>
-                  </SheetClose>
+                  {session ? (
+                    <>
+                      <SheetClose asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setOpen(false)}
+                        >
+                          <Link
+                            href="/dashboard"
+                            className="flex w-full items-center justify-center"
+                          >
+                            Trang chủ
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                      <div className="flex items-center gap-3 px-1 py-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={session.user.image || "/placeholder-user.jpg"}
+                            alt={session.user.name || "Người dùng"}
+                          />
+                          <AvatarFallback>
+                            {session.user.name
+                              ? session.user.name.substring(0, 2).toUpperCase()
+                              : "ND"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {session.user.name || "Người dùng"}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {session.user.email}
+                          </span>
+                        </div>
+                      </div>
+                      <SheetClose asChild>
+                        <Button
+                          variant="secondary"
+                          className="w-full"
+                          onClick={handleSignOut}
+                        >
+                          Đăng xuất
+                        </Button>
+                      </SheetClose>
+                    </>
+                  ) : (
+                    <>
+                      <SheetClose asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setOpen(false)}
+                        >
+                          <Link
+                            href="/auth/login"
+                            className="flex w-full items-center justify-center"
+                          >
+                            Đăng nhập
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button
+                          className="w-full"
+                          onClick={() => setOpen(false)}
+                        >
+                          <Link
+                            href="/auth/register"
+                            className="flex w-full items-center justify-center"
+                          >
+                            Dùng thử miễn phí
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>
