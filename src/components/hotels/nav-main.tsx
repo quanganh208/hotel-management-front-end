@@ -13,6 +13,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
 
 export function NavMain({
   items,
@@ -28,6 +29,10 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const params = useParams();
+  const pathname = usePathname();
+  const hotelId = params.id as string;
+
   const [openItems, setOpenItems] = useState<Record<string, boolean>>(
     Object.fromEntries(
       items
@@ -43,19 +48,30 @@ export function NavMain({
     }));
   };
 
+  const replaceIdInUrl = (url: string) => {
+    return url.replace("[id]", hotelId);
+  };
+
+  const isRouteActive = (url: string) => {
+    const fullUrl = replaceIdInUrl(url);
+    return pathname.startsWith(fullUrl);
+  };
+
   return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => {
           if (!item.items || item.items.length === 0) {
+            const isActive = isRouteActive(item.url);
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   tooltip={item.title}
                   asChild
-                  className="py-2"
+                  className={`py-2 ${isActive ? "bg-primary/20 text-primary dark:bg-sidebar-accent" : ""}`}
+                  isActive={isActive}
                 >
-                  <Link href={item.url}>
+                  <Link href={replaceIdInUrl(item.url)}>
                     {item.icon && <item.icon className="h-5 w-5" />}
                     <span>{item.title}</span>
                   </Link>
@@ -65,14 +81,16 @@ export function NavMain({
           }
 
           const isOpen = openItems[item.title] || false;
+          const isActive = isRouteActive(item.url);
 
           return (
             <SidebarMenuItem key={item.title} className="py-1">
               <div className="group/collapsible">
                 <SidebarMenuButton
                   tooltip={item.title}
-                  className=" py-2 w-full"
+                  className={`py-2 w-full ${isActive ? "bg-primary/20 text-primary dark:bg-sidebar-accent" : ""}`}
                   onClick={() => handleOpenChange(item.title, !isOpen)}
+                  isActive={isActive}
                 >
                   {item.icon && <item.icon className="h-5 w-5" />}
                   <span>{item.title}</span>
@@ -94,15 +112,22 @@ export function NavMain({
                         }}
                       >
                         <SidebarMenuSub className="space-y-1 py-1">
-                          {item.items?.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton asChild className=" py-1.5">
-                                <Link href={subItem.url}>
-                                  <span>{subItem.title}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
+                          {item.items?.map((subItem) => {
+                            const isSubItemActive = isRouteActive(subItem.url);
+                            return (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  className={`py-1.5 ${isSubItemActive ? "bg-primary/20 text-primary dark:bg-sidebar-accent" : ""}`}
+                                  isActive={isSubItemActive}
+                                >
+                                  <Link href={replaceIdInUrl(subItem.url)}>
+                                    <span>{subItem.title}</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
                         </SidebarMenuSub>
                       </motion.div>
                     )}

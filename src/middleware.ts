@@ -57,7 +57,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Nếu người dùng đã đăng nhập và đang truy cập trang đăng nhập hoặc đăng ký
-  if (token && (pathname === "/auth/login" || pathname === "/auth/register")) {
+  if (
+    token &&
+    (pathname === "/auth/login" ||
+      pathname === "/auth/register" ||
+      pathname === "/auth/forgot-password" ||
+      pathname === "/auth/reset-password" ||
+      pathname === "/auth/verify-account")
+  ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

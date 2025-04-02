@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { MapPin, Building } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,13 +32,12 @@ const item = {
 };
 
 export default function DashboardPage() {
-  const { hotels, isLoading, error, fetchHotels } = useHotelStore();
-  const [initialized, setInitialized] = useState(false);
+  const { hotels, isLoading, error, fetchHotels, isInitialized } =
+    useHotelStore();
 
   useEffect(() => {
     fetchHotels();
-    setInitialized(true);
-  }, [fetchHotels]);
+  }, []);
 
   return (
     <DashboardShell>
@@ -48,13 +47,17 @@ export default function DashboardPage() {
           <CreateHotelDialog />
         </motion.div>
       </div>
-      {isLoading || !initialized ? (
+      {isLoading ? (
         <div className="flex items-center justify-center h-[400px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center h-[400px] text-destructive">
           {error}
+        </div>
+      ) : !isInitialized ? (
+        <div className="flex items-center justify-center h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : hotels.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
@@ -93,12 +96,14 @@ export default function DashboardPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="p-3">
-                    <CardTitle className="line-clamp-1 text-xl">
+                    <CardTitle className="truncate text-xl" title={hotel.name}>
                       {hotel.name}
                     </CardTitle>
                     <div className="mt-2 flex items-center text-sm text-muted-foreground">
-                      <MapPin className="mr-1 h-4 w-4" />
-                      {hotel.address}
+                      <MapPin className="mr-1 h-4 w-4 flex-shrink-0" />
+                      <span className="truncate" title={hotel.address}>
+                        {hotel.address}
+                      </span>
                     </div>
                   </CardContent>
                   <CardFooter className="border-t bg-muted/50 p-3">

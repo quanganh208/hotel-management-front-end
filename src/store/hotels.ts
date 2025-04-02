@@ -1,6 +1,6 @@
-import {create} from "zustand";
+import { create } from "zustand";
 import axiosInstance from "@/lib/axios";
-import {HotelStore, CreateHotelForm} from "@/types/hotel";
+import { HotelStore, CreateHotelForm } from "@/types/hotel";
 
 // Lỗi validation
 const VALIDATION_ERRORS = {
@@ -28,6 +28,7 @@ const initialState = {
   isLoading: false,
   error: null,
   success: null,
+  isInitialized: false,
 
   // Form state
   createHotelForm: {
@@ -48,9 +49,9 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
   // Data actions
   fetchHotels: async () => {
     try {
-      set({isLoading: true, error: null});
+      set({ isLoading: true, error: null });
       const response = await axiosInstance.get("/hotels/me");
-      set({hotels: response.data, isLoading: false});
+      set({ hotels: response.data, isLoading: false, isInitialized: true });
       //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       set({
@@ -71,7 +72,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
   },
 
   validateCreateHotelField: (field) => {
-    const {createHotelForm} = get();
+    const { createHotelForm } = get();
     let isValid = false;
 
     switch (field) {
@@ -152,11 +153,11 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
   },
 
   createHotel: async () => {
-    const {createHotelForm, validateAllCreateHotelFields} = get();
+    const { createHotelForm, validateAllCreateHotelFields } = get();
 
     if (!validateAllCreateHotelFields()) return;
 
-    set(() => ({isLoading: true, error: null, success: null}));
+    set(() => ({ isLoading: true, error: null, success: null }));
 
     try {
       const formData = new FormData();
@@ -173,7 +174,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
       });
 
       if (response.data?.message) {
-        set(() => ({success: response.data.message}));
+        set(() => ({ success: response.data.message }));
       }
       //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -185,14 +186,14 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
         errorMessage = API_ERRORS.CONNECTION;
       }
 
-      set(() => ({error: errorMessage}));
+      set(() => ({ error: errorMessage }));
     } finally {
-      set(() => ({isLoading: false}));
+      set(() => ({ isLoading: false }));
     }
   },
 
   // Common actions
-  setError: (error) => set(() => ({error})),
-  setSuccess: (success) => set(() => ({success})),
-  resetMessages: () => set(() => ({error: null, success: null})),
+  setError: (error) => set(() => ({ error })),
+  setSuccess: (success) => set(() => ({ success })),
+  resetMessages: () => set(() => ({ error: null, success: null })),
 }));

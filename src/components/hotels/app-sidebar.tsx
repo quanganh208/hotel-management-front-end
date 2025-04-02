@@ -4,7 +4,6 @@ import * as React from "react";
 import {
   BarChart2,
   Bed,
-  Building,
   DollarSign,
   FileText,
   Home,
@@ -24,110 +23,93 @@ import { NavMain } from "./nav-main";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const data = {
-  hotels: [
-    {
-      name: "Resort Phú Quốc",
-      logo: Building,
-      location: "Phú Quốc, Kiên Giang",
-    },
-    {
-      name: "Palais De Jade",
-      logo: Building,
-      location: "Đà Nẵng",
-    },
-    {
-      name: "Hilton Hà Nội",
-      logo: Building,
-      location: "Hà Nội",
-    },
-  ],
   navMain: [
     {
       title: "Tổng quan",
-      url: "#",
+      url: "/hotels/[id]/overview",
       icon: Home,
     },
     {
       title: "Phòng",
-      url: "#",
+      url: "/hotels/[id]/rooms",
       icon: Bed,
       items: [
         {
           title: "Hạng phòng",
-          url: "#",
+          url: "/hotels/[id]/rooms/categories",
         },
         {
           title: "Danh sách phòng",
-          url: "#",
+          url: "/hotels/[id]/rooms/list",
         },
       ],
     },
     {
       title: "Giao dịch",
-      url: "#",
+      url: "/hotels/[id]/transactions",
       icon: FileText,
       items: [
         {
           title: "Đặt phòng",
-          url: "#",
+          url: "/hotels/[id]/transactions/bookings",
         },
         {
           title: "Hoá đơn",
-          url: "#",
+          url: "/hotels/[id]/transactions/invoices",
         },
         {
           title: "Nhập hàng",
-          url: "#",
+          url: "/hotels/[id]/transactions/purchases",
         },
       ],
     },
     {
       title: "Hàng hoá",
-      url: "#",
+      url: "/hotels/[id]/inventory",
       icon: Package,
       items: [
         {
           title: "Danh mục",
-          url: "#",
+          url: "/hotels/[id]/inventory/categories",
         },
         {
           title: "Kiểm kho",
-          url: "#",
+          url: "/hotels/[id]/inventory/stock",
         },
       ],
     },
     {
       title: "Sổ quỹ",
-      url: "#",
+      url: "/hotels/[id]/finance",
       icon: DollarSign,
     },
     {
       title: "Nhân viên",
-      url: "#",
+      url: "/hotels/[id]/staff",
       icon: Users,
       items: [
         {
           title: "Danh sách nhân viên",
-          url: "#",
+          url: "/hotels/[id]/staff/list",
         },
         {
           title: "Thiết lập nhân viên",
-          url: "#",
+          url: "/hotels/[id]/staff/settings",
         },
       ],
     },
     {
       title: "Báo cáo",
-      url: "#",
+      url: "/hotels/[id]/reports",
       icon: BarChart2,
       items: [
         {
           title: "Cuối ngày",
-          url: "#",
+          url: "/hotels/[id]/reports/daily",
         },
         {
           title: "Doanh thu",
-          url: "#",
+          url: "/hotels/[id]/reports/revenue",
         },
       ],
     },
@@ -144,7 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <HotelSwitcher hotels={data.hotels} />
+        <HotelSwitcher />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

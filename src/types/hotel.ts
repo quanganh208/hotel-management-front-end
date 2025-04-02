@@ -35,6 +35,7 @@ export interface HotelStore {
   isLoading: boolean;
   error: string | null;
   success: string | null;
+  isInitialized: boolean;
   createHotelForm: CreateHotelForm;
   createHotelFormErrors: CreateHotelFormErrors;
   fetchHotels: () => Promise<void>;

@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 
-export default async function HotelPage({
+export default async function StaffPage({
   params,
 }: {
   params: { id: string };
 }) {
-  redirect(`/hotels/${params.id}/overview`);
+  redirect(`/hotels/${params.id}/staff/list`);
 }

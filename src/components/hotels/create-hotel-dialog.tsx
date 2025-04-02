@@ -44,13 +44,20 @@ export function CreateHotelDialog() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createHotel();
+  };
+
   useEffect(() => {
     if (success) {
       toast.success(success);
       setOpen(false);
       fetchHotels();
+      resetCreateHotelForm();
+      resetMessages();
     }
-  }, [success, fetchHotels]);
+  }, [success, fetchHotels, resetCreateHotelForm, resetMessages]);
 
   useEffect(() => {
     if (error) {
@@ -90,13 +97,7 @@ export function CreateHotelDialog() {
             Điền thông tin khách sạn của bạn vào form bên dưới.
           </DialogDescription>
         </DialogHeader>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await createHotel();
-          }}
-          className="grid gap-4 py-4"
-        >
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Tên khách sạn</Label>
             <Input

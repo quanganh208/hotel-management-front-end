@@ -8,5 +8,13 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  return <SessionProvider basePath="/api/auth">{children}</SessionProvider>;
+  return (
+    <SessionProvider
+      basePath="/api/auth"
+      refetchInterval={5 * 60}
+      refetchOnWindowFocus={false}
+    >
+      {children}
+    </SessionProvider>
+  );
 }
