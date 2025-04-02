@@ -20,7 +20,7 @@ export const authOptions: AuthOptions = {
         try {
           const response = await authService.login(
             credentials.email,
-            credentials.password
+            credentials.password,
           );
 
           if (response && response.access_token) {
@@ -38,7 +38,7 @@ export const authOptions: AuthOptions = {
           // Xử lý lỗi kết nối
           if (error.code === "ECONNREFUSED") {
             throw new Error(
-              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
+              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
             );
           }
 
@@ -148,7 +148,7 @@ export const authService = {
 
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/login",
-        data
+        data,
       );
 
       return response.data;
@@ -162,7 +162,7 @@ export const authService = {
     try {
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/google-auth",
-        { idToken }
+        { idToken },
       );
 
       return response.data;
@@ -170,7 +170,7 @@ export const authService = {
     } catch (error: any) {
       if (error.code === "ECONNREFUSED") {
         throw new Error(
-          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
+          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
         );
       }
 
@@ -182,7 +182,7 @@ export const authService = {
 
       // Lỗi mặc định
       throw new Error(
-        "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
+        "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
       );
     }
   },

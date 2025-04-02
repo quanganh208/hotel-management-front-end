@@ -25,7 +25,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add a response interceptor
@@ -38,7 +38,7 @@ axiosInstance.interceptors.response.use(
       await signOut({ redirect: true, callbackUrl: "/auth/login" });
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

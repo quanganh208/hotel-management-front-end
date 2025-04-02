@@ -32,7 +32,7 @@ export default async function HotelDetailPage(props: {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#" >
+                    <BreadcrumbLink href="#">
                       Building Your Application
                     </BreadcrumbLink>
                   </BreadcrumbItem>

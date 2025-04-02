@@ -32,8 +32,8 @@ export function NavMain({
     Object.fromEntries(
       items
         .filter((item) => item.isActive && item.items && item.items.length > 0)
-        .map((item) => [item.title, true])
-    )
+        .map((item) => [item.title, true]),
+    ),
   );
 
   const handleOpenChange = (title: string, open: boolean) => {
@@ -96,10 +96,7 @@ export function NavMain({
                         <SidebarMenuSub className="space-y-1 py-1">
                           {item.items?.map((subItem) => (
                             <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton
-                                asChild
-                                className=" py-1.5"
-                              >
+                              <SidebarMenuSubButton asChild className=" py-1.5">
                                 <Link href={subItem.url}>
                                   <span>{subItem.title}</span>
                                 </Link>

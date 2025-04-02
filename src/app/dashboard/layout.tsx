@@ -1,4 +1,5 @@
-import type {Metadata} from "next";
+import { Toaster } from "@/components/ui/sonner";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Hệ thống Quản lý Khách sạn | Trang chủ",
@@ -6,11 +7,14 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardLayout({
-                                          children,
-                                        }: {
+  children,
+}: {
   children: React.ReactNode;
 }) {
   return (
-    <div>{children}</div>
-  )
+    <div>
+      {children}
+      <Toaster />
+    </div>
+  );
 }

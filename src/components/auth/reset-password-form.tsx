@@ -136,7 +136,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="Nhập mật khẩu của bạn"
                     value={resetPasswordForm.newPassword}
                     onChange={(e) =>
                       setResetPasswordForm("newPassword", e.target.value)
@@ -170,7 +170,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="Nhập lại mật khẩu của bạn"
                     value={resetPasswordForm.confirmPassword}
                     onChange={(e) =>
                       setResetPasswordForm("confirmPassword", e.target.value)

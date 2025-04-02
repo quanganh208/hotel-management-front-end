@@ -2,177 +2,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axiosInstance from "@/lib/axios";
 import { signIn, signOut } from "next-auth/react";
-
-// Khai báo các interface
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  isVerified: boolean;
-}
-
-interface RegisterForm {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-interface RegisterFormErrors {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-interface LoginForm {
-  email: string;
-  password: string;
-}
-
-interface LoginFormErrors {
-  email: string;
-  password: string;
-}
-
-interface VerifyForm {
-  email: string;
-  verificationCode: string;
-}
-
-// Thêm interface ForgotPasswordForm
-interface ForgotPasswordForm {
-  email: string;
-}
-
-// Thêm interface ResetPasswordForm
-interface ResetPasswordForm {
-  token: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-interface ResetPasswordFormErrors {
-  newPassword: string;
-  confirmPassword: string;
-}
-
-// Interface chính cho AuthState
-interface AuthState {
-  // User state
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  error: string;
-  success: string;
-
-  // Form states
-  registerForm: RegisterForm;
-  registerFormErrors: RegisterFormErrors;
-  loginForm: LoginForm;
-  loginFormErrors: LoginFormErrors;
-  verifyForm: VerifyForm;
-  verifyFormError: string;
-  // Thêm state cho form quên mật khẩu
-  forgotPasswordForm: ForgotPasswordForm;
-  forgotPasswordFormError: string;
-  // Thêm state cho form đặt lại mật khẩu
-  resetPasswordForm: ResetPasswordForm;
-  resetPasswordFormErrors: ResetPasswordFormErrors;
-
-  // Form actions - Register
-  setRegisterForm: (field: keyof RegisterForm, value: string) => void;
-  validateRegisterField: (field: keyof RegisterForm) => boolean;
-  validateAllRegisterFields: () => boolean;
-  resetRegisterForm: () => void;
-  register: () => Promise<void>;
-
-  // Form actions - Login
-  setLoginForm: (field: keyof LoginForm, value: string) => void;
-  validateLoginField: (field: keyof LoginForm) => boolean;
-  validateAllLoginFields: () => boolean;
-  resetLoginForm: () => void;
-  login: () => Promise<boolean>;
-  loginWithGoogle: () => Promise<boolean>;
-  logout: () => Promise<void>;
-
-  // Form actions - Verification
-  setVerificationCode: (code: string) => void;
-  validateVerificationCode: () => boolean;
-  verifyAccount: () => Promise<void>;
-  verificationCode: () => Promise<void>;
-
-  // Form actions - Forgot Password
-  setForgotPasswordEmail: (email: string) => void;
-  validateForgotPasswordEmail: () => boolean;
-  resetForgotPasswordForm: () => void;
-  forgotPassword: () => Promise<void>;
-
-  // Form actions - Reset Password
-  setResetPasswordForm: (field: keyof ResetPasswordForm, value: string) => void;
-  validateResetPasswordField: (field: keyof ResetPasswordForm) => boolean;
-  validateAllResetPasswordFields: () => boolean;
-  resetResetPasswordForm: () => void;
-  resetPassword: () => Promise<void>;
-
-  // Common actions
-  setError: (error: string) => void;
-  setSuccess: (success: string) => void;
-  resetMessages: () => void;
-}
-
-// Khởi tạo giá trị mặc định
-const initialState = {
-  // User state
-  user: null,
-  token: null,
-  isLoading: false,
-  error: "",
-  success: "",
-
-  // Form states
-  registerForm: {
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  },
-  registerFormErrors: {
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  },
-  loginForm: {
-    email: "",
-    password: "",
-  },
-  loginFormErrors: {
-    email: "",
-    password: "",
-  },
-  verifyForm: {
-    email: "",
-    verificationCode: "",
-  },
-  verifyFormError: "",
-  // Thêm state cho form quên mật khẩu
-  forgotPasswordForm: {
-    email: "",
-  },
-  forgotPasswordFormError: "",
-  // Thêm state cho form đặt lại mật khẩu
-  resetPasswordForm: {
-    token: "",
-    newPassword: "",
-    confirmPassword: "",
-  },
-  resetPasswordFormErrors: {
-    newPassword: "",
-    confirmPassword: "",
-  },
-};
+import type {
+  AuthState,
+  RegisterForm,
+  LoginForm,
+  ResetPasswordForm,
+} from "@/types/auth";
 
 // Lỗi validation
 const VALIDATION_ERRORS = {
@@ -214,6 +49,56 @@ const SUCCESS_MESSAGES = {
   FORGOT_PASSWORD_SUCCESS:
     "Đã gửi email hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn.",
   RESET_PASSWORD_SUCCESS: "Đặt lại mật khẩu thành công",
+};
+
+// Khởi tạo giá trị mặc định
+const initialState = {
+  // User state
+  user: null,
+  token: null,
+  isLoading: false,
+  error: "",
+  success: "",
+
+  // Form states
+  registerForm: {
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  },
+  registerFormErrors: {
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  },
+  loginForm: {
+    email: "",
+    password: "",
+  },
+  loginFormErrors: {
+    email: "",
+    password: "",
+  },
+  verifyForm: {
+    email: "",
+    verificationCode: "",
+  },
+  verifyFormError: "",
+  forgotPasswordForm: {
+    email: "",
+  },
+  forgotPasswordFormError: "",
+  resetPasswordForm: {
+    token: "",
+    newPassword: "",
+    confirmPassword: "",
+  },
+  resetPasswordFormErrors: {
+    newPassword: "",
+    confirmPassword: "",
+  },
 };
 
 // Tạo store với zustand
