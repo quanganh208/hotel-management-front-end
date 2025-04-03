@@ -11,6 +11,7 @@ const VALIDATION_ERRORS = {
   EMPTY_IMAGE: "Vui lòng chọn ảnh cho khách sạn",
   INVALID_IMAGE:
     "File ảnh không hợp lệ. Chỉ chấp nhận các định dạng: jpg, jpeg, png",
+  IMAGE_TOO_LARGE: "Kích thước ảnh không được vượt quá 10MB",
 };
 
 // Lỗi API
@@ -129,8 +130,44 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
         break;
 
       case "image":
-        // Image là optional nên luôn valid
-        isValid = true;
+        // Image là optional nên luôn valid nếu không có file
+        if (createHotelForm.image) {
+          // Kiểm tra định dạng file
+          if (!createHotelForm.image.type.match(/^image\/(jpeg|jpg|png)$/)) {
+            set((state) => ({
+              createHotelFormErrors: {
+                ...state.createHotelFormErrors,
+                image: VALIDATION_ERRORS.INVALID_IMAGE,
+              },
+            }));
+          }
+          // Kiểm tra kích thước file
+          else if (createHotelForm.image.size > 10 * 1024 * 1024) {
+            // 10MB
+            set((state) => ({
+              createHotelFormErrors: {
+                ...state.createHotelFormErrors,
+                image: VALIDATION_ERRORS.IMAGE_TOO_LARGE,
+              },
+            }));
+          } else {
+            set((state) => ({
+              createHotelFormErrors: {
+                ...state.createHotelFormErrors,
+                image: "",
+              },
+            }));
+            isValid = true;
+          }
+        } else {
+          set((state) => ({
+            createHotelFormErrors: {
+              ...state.createHotelFormErrors,
+              image: "",
+            },
+          }));
+          isValid = true;
+        }
         break;
     }
 
@@ -140,7 +177,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
   validateAllCreateHotelFields: () => {
     const fields: (keyof CreateHotelForm)[] = ["name", "address", "image"];
     const results = fields.map((field) =>
-      get().validateCreateHotelField(field),
+      get().validateCreateHotelField(field)
     );
     return results.every((result) => result === true);
   },

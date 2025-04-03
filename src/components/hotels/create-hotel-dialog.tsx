@@ -72,6 +72,14 @@ export function CreateHotelDialog() {
         toast.error("Chỉ chấp nhận các định dạng: JPG, JPEG, PNG");
         return;
       }
+
+      // Kiểm tra kích thước file (10MB = 10 * 1024 * 1024 bytes)
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error("Kích thước ảnh không được vượt quá 10MB");
+        return;
+      }
+
       setCreateHotelForm("image", file);
     }
   };
@@ -120,7 +128,7 @@ export function CreateHotelDialog() {
               value={createHotelForm.address}
               onChange={(e) => setCreateHotelForm("address", e.target.value)}
               className={cn(
-                createHotelFormErrors.address && "border-destructive",
+                createHotelFormErrors.address && "border-destructive"
               )}
               disabled={isLoading}
             />
@@ -159,12 +167,13 @@ export function CreateHotelDialog() {
                   htmlFor="image"
                   className={cn(
                     "flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-accent/50",
-                    createHotelFormErrors.image && "border-destructive",
+                    createHotelFormErrors.image && "border-destructive"
                   )}
                 >
                   <ImagePlus className="h-8 w-8" />
                   <span>Nhấp vào đây để chọn ảnh</span>
                   <span className="text-xs">Chấp nhận: JPG, JPEG, PNG</span>
+                  <span className="text-xs">Kích thước tối đa: 10MB</span>
                 </label>
               )}
               <input
