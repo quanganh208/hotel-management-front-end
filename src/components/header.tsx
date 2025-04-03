@@ -31,11 +31,13 @@ import {
 import { useState, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [avatarFallback, setAvatarFallback] = useState("");
+  const isLoading = status === "loading";
 
   useEffect(() => {
     if (session?.user?.name) {
@@ -75,7 +77,12 @@ export default function Header() {
         </motion.div>
 
         {/* Desktop Buttons */}
-        {session && (
+        {isLoading ? (
+          <div className="hidden lg:flex items-center gap-4">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        ) : session ? (
           <div className="hidden lg:flex items-center gap-4">
             <ThemeToggle />
             <DropdownMenu>
@@ -137,72 +144,81 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        )}
+        ) : null}
 
         {/* Mobile Menu Button */}
         <div className="lg:hidden flex items-center gap-2">
-          <ThemeToggle />
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Mở menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-64 p-6">
-              <SheetTitle>Menu</SheetTitle>
+          {isLoading ? (
+            <>
+              <Skeleton className="h-8 w-8" />
+              <Skeleton className="h-8 w-8" />
+            </>
+          ) : (
+            <>
+              <ThemeToggle />
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Mở menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-64 p-6">
+                  <SheetTitle>Menu</SheetTitle>
 
-              <div className="flex flex-col gap-6">
-                {session && (
-                  <div className="flex flex-col gap-4 mt-4">
-                    <div className="flex items-center gap-3 px-1 py-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={
-                            session.user?.image ||
-                            `/api/avatar?name=${encodeURIComponent(session.user?.name || "User")}`
-                          }
-                          alt={session.user?.name || "Người dùng"}
-                        />
-                        <AvatarFallback>{avatarFallback}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {session.user?.name || "Người dùng"}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {session.user?.email}
-                        </span>
+                  <div className="flex flex-col gap-6">
+                    {session && (
+                      <div className="flex flex-col gap-4 mt-4">
+                        <div className="flex items-center gap-3 px-1 py-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={
+                                session.user?.image ||
+                                `/api/avatar?name=${encodeURIComponent(session.user?.name || "User")}`
+                              }
+                              alt={session.user?.name || "Người dùng"}
+                            />
+                            <AvatarFallback>{avatarFallback}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {session.user?.name || "Người dùng"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {session.user?.email}
+                            </span>
+                          </div>
+                        </div>
+                        <SheetClose asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => setOpen(false)}
+                          >
+                            <Link
+                              href="#"
+                              className="flex w-full items-center justify-center"
+                            >
+                              Tài khoản
+                            </Link>
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button
+                            variant="secondary"
+                            className="w-full"
+                            onClick={handleSignOut}
+                          >
+                            Đăng xuất
+                          </Button>
+                        </SheetClose>
                       </div>
-                    </div>
-                    <SheetClose asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setOpen(false)}
-                      >
-                        <Link
-                          href="#"
-                          className="flex w-full items-center justify-center"
-                        >
-                          Tài khoản
-                        </Link>
-                      </Button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Button
-                        variant="secondary"
-                        className="w-full"
-                        onClick={handleSignOut}
-                      >
-                        Đăng xuất
-                      </Button>
-                    </SheetClose>
+                    )}
                   </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+                </SheetContent>
+              </Sheet>
+            </>
+          )}
         </div>
       </div>
     </motion.header>

@@ -37,7 +37,7 @@ export default function DashboardPage() {
     useHotelStore();
 
   useEffect(() => {
-    fetchHotels().then(r => r);
+    fetchHotels().then((r) => r);
   }, [fetchHotels]);
 
   return (
