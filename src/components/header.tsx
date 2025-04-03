@@ -28,13 +28,30 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
+  const [avatarFallback, setAvatarFallback] = useState("");
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      // Tạo chữ cái đầu của tên và họ người dùng
+      const initials = session.user.name
+        .split(" ")
+        .map((name) => name[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+      setAvatarFallback(initials);
+    } else {
+      setAvatarFallback("ND");
+    }
+  }, [session]);
+
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/auth/login" });
   };
@@ -69,14 +86,13 @@ export default function Header() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={session.user?.image || "/placeholder-user.jpg"}
+                      src={
+                        session.user?.image ||
+                        `/api/avatar?name=${encodeURIComponent(session.user?.name || "User")}`
+                      }
                       alt={session.user?.name || "Người dùng"}
                     />
-                    <AvatarFallback>
-                      {session.user?.name
-                        ? session.user.name.substring(0, 2).toUpperCase()
-                        : "ND"}
-                    </AvatarFallback>
+                    <AvatarFallback>{avatarFallback}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -142,14 +158,13 @@ export default function Header() {
                     <div className="flex items-center gap-3 px-1 py-2">
                       <Avatar className="h-8 w-8">
                         <AvatarImage
-                          src={session.user?.image || "/placeholder-user.jpg"}
+                          src={
+                            session.user?.image ||
+                            `/api/avatar?name=${encodeURIComponent(session.user?.name || "User")}`
+                          }
                           alt={session.user?.name || "Người dùng"}
                         />
-                        <AvatarFallback>
-                          {session.user?.name
-                            ? session.user.name.substring(0, 2).toUpperCase()
-                            : "ND"}
-                        </AvatarFallback>
+                        <AvatarFallback>{avatarFallback}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">
@@ -167,7 +182,7 @@ export default function Header() {
                         onClick={() => setOpen(false)}
                       >
                         <Link
-                          href="/profile"
+                          href="#"
                           className="flex w-full items-center justify-center"
                         >
                           Tài khoản

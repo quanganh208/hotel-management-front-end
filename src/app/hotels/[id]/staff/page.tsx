@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 
-export default async function StaffPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  redirect(`/hotels/${params.id}/staff/list`);
+type PageParams = Promise<{ id: string[] }>;
+export default async function StaffPage({ params }: { params: PageParams }) {
+  const { id } = await params;
+  redirect(`/hotels/${id}/staff/list`);
 }

@@ -14,10 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import Header from "@/components/header";
 
-export default async function InvoicesPage(props: {
-  params: Promise<{ id: string }>;
-}) {
-  const params = await props.params;
+export default function InvoicesPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />

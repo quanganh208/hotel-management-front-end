@@ -31,6 +31,7 @@ declare module "next-auth/jwt" {
     id: string;
     accessToken: string;
     provider?: string;
+    picture?: string;
   }
 }
 
@@ -39,6 +40,7 @@ export interface LoginResponse {
   name: string;
   email: string;
   access_token: string;
+  image?: string;
 }
 
 export interface ApiError {

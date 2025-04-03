@@ -177,7 +177,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
   validateAllCreateHotelFields: () => {
     const fields: (keyof CreateHotelForm)[] = ["name", "address", "image"];
     const results = fields.map((field) =>
-      get().validateCreateHotelField(field)
+      get().validateCreateHotelField(field),
     );
     return results.every((result) => result === true);
   },

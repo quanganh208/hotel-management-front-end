@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import ResetPasswordForm from "@/components/auth/reset-password-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import LoadingPage from "@/components/ui/loading-page";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -54,5 +55,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingPage text="Đang xử lý yêu cầu..." />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

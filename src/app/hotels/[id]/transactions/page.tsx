@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 
+type PageParams = Promise<{ id: string[] }>;
 export default async function TransactionsPage({
   params,
 }: {
-  params: { id: string };
+  params: PageParams;
 }) {
-  redirect(`/hotels/${params.id}/transactions/bookings`);
+  const { id } = await params;
+  redirect(`/hotels/${id}/transactions/bookings`);
 }

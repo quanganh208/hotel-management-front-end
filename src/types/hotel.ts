@@ -9,10 +9,10 @@ export interface Hotel {
     name: string;
     image: string;
   };
-  staff: any[];
-  rooms: any[];
-  inventory: any[];
-  transactions: any[];
+  staff: [];
+  rooms: [];
+  inventory: [];
+  transactions: [];
   createdAt: string;
   updatedAt: string;
   __v: number;

@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import Header from "@/components/header";
 
-export default async function FinancePage(props: {
-  params: Promise<{ id: string }>;
-}) {
-  const params = await props.params;
+export default function FinancePage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />

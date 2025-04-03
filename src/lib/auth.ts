@@ -29,6 +29,9 @@ export const authOptions: AuthOptions = {
               name: response.name,
               email: response.email,
               accessToken: response.access_token,
+              image:
+                response.image ||
+                `/api/avatar?name=${encodeURIComponent(response.name)}`,
             };
           }
 
@@ -100,6 +103,11 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         token.accessToken = user.accessToken;
+
+        // Nếu user.image có sẵn từ credentials, lưu vào token
+        if (user.image) {
+          token.picture = user.image;
+        }
       }
 
       // Nếu là đăng nhập Google, lưu thông tin từ Google
@@ -119,6 +127,12 @@ export const authOptions: AuthOptions = {
       if (token && session.user) {
         session.user.id = token.id;
         session.user.accessToken = token.accessToken;
+
+        // Đảm bảo image được truyền từ token sang session
+        if (token.picture) {
+          session.user.image = token.picture;
+        }
+
         // Thêm provider nếu có
         if (token.provider) {
           session.user.provider = token.provider;

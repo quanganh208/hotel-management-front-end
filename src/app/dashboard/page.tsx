@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Building } from "lucide-react";
 import { useEffect } from "react";
 
@@ -36,8 +37,8 @@ export default function DashboardPage() {
     useHotelStore();
 
   useEffect(() => {
-    fetchHotels();
-  }, []);
+    fetchHotels().then(r => r);
+  }, [fetchHotels]);
 
   return (
     <DashboardShell>
@@ -81,12 +82,15 @@ export default function DashboardPage() {
               <Link href={`/hotels/${hotel._id}`}>
                 <Card className="overflow-hidden cursor-pointer transition-colors hover:bg-muted/50 py-0">
                   <CardHeader className="p-0">
-                    <div className="h-48 w-full overflow-hidden">
+                    <div className="h-48 w-full overflow-hidden relative">
                       {hotel.image ? (
-                        <img
+                        <Image
                           src={hotel.image}
                           alt={hotel.name}
-                          className="h-full w-full object-cover transition-transform hover:scale-105"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover transition-transform hover:scale-105"
+                          priority={false}
                         />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center bg-gray-100">
