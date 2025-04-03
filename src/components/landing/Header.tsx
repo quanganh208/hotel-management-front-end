@@ -1,8 +1,16 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Building2, Menu } from "lucide-react";
+import {
+  BadgeCheck,
+  Bell,
+  Building2,
+  CreditCard,
+  LogOut,
+  Menu,
+  Sparkles,
+} from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -19,11 +27,30 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const isLoading = status === "loading";
+  const [avatarFallback, setAvatarFallback] = useState("");
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      // Tạo chữ cái đầu của tên và họ người dùng
+      const initials = session.user.name
+        .split(" ")
+        .map((name) => name[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+      setAvatarFallback(initials);
+    } else {
+      setAvatarFallback("ND");
+    }
+  }, [session]);
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
@@ -76,7 +103,12 @@ export default function Header() {
 
         {/* Desktop Buttons */}
         <div className="hidden lg:flex items-center gap-4">
-          {session ? (
+          {isLoading ? (
+            <>
+              <Skeleton className="h-10 w-24 rounded-md" />
+              <Skeleton className="h-8 w-8 rounded-full" />
+            </>
+          ) : session ? (
             <>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -94,14 +126,13 @@ export default function Header() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={session.user.image || "/placeholder-user.jpg"}
+                        src={
+                          session.user.image ||
+                          `/api/avatar?name=${encodeURIComponent(session.user?.name || "User")}`
+                        }
                         alt={session.user.name || "Người dùng"}
                       />
-                      <AvatarFallback>
-                        {session.user.name
-                          ? session.user.name.substring(0, 2).toUpperCase()
-                          : "ND"}
-                      </AvatarFallback>
+                      <AvatarFallback>{avatarFallback}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -117,27 +148,31 @@ export default function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link
-                      href="/dashboard"
-                      className="flex w-full items-center"
-                    >
-                      Trang chủ
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/profile" className="flex w-full items-center">
-                      Tài khoản
-                    </Link>
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Nâng cấp lên Pro
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <button
-                      onClick={handleSignOut}
-                      className="flex w-full items-center cursor-pointer"
-                    >
-                      Đăng xuất
-                    </button>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <BadgeCheck className="mr-2 h-4 w-4" />
+                      Tài khoản
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Thanh toán
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Bell className="mr-2 h-4 w-4" />
+                      Thông báo
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Đăng xuất
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -165,114 +200,165 @@ export default function Header() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="lg:hidden">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Mở menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-64 p-6">
-              <SheetTitle>Menu</SheetTitle>
+        <div className="lg:hidden flex items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-8 w-8" />
+              <Skeleton className="h-8 w-8" />
+            </>
+          ) : (
+            <>
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Mở menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-64 p-6">
+                  <SheetTitle>Menu</SheetTitle>
 
-              <div className="flex flex-col gap-6">
-                <nav className="flex flex-col gap-4">
-                  {navItems.map((item, i) => (
-                    <SheetClose asChild key={i}>
-                      <Link
-                        href={item.href}
-                        className="text-sm font-medium hover:text-primary"
-                        onClick={() => setOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                    </SheetClose>
-                  ))}
-                </nav>
-                <div className="flex flex-col gap-4 mt-4">
-                  {session ? (
-                    <>
-                      <SheetClose asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => setOpen(false)}
-                        >
+                  <div className="flex flex-col gap-6">
+                    <nav className="flex flex-col gap-4">
+                      {navItems.map((item, i) => (
+                        <SheetClose asChild key={i}>
                           <Link
-                            href="/dashboard"
-                            className="flex w-full items-center justify-center"
+                            href={item.href}
+                            className="text-sm font-medium hover:text-primary"
+                            onClick={() => setOpen(false)}
                           >
-                            Trang chủ
+                            {item.name}
                           </Link>
-                        </Button>
-                      </SheetClose>
-                      <div className="flex items-center gap-3 px-1 py-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={session.user.image || "/placeholder-user.jpg"}
-                            alt={session.user.name || "Người dùng"}
-                          />
-                          <AvatarFallback>
-                            {session.user.name
-                              ? session.user.name.substring(0, 2).toUpperCase()
-                              : "ND"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium">
-                            {session.user.name || "Người dùng"}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {session.user.email}
-                          </span>
-                        </div>
-                      </div>
-                      <SheetClose asChild>
-                        <Button
-                          variant="secondary"
-                          className="w-full"
-                          onClick={handleSignOut}
-                        >
-                          Đăng xuất
-                        </Button>
-                      </SheetClose>
-                    </>
-                  ) : (
-                    <>
-                      <SheetClose asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => setOpen(false)}
-                        >
-                          <Link
-                            href="/auth/login"
-                            className="flex w-full items-center justify-center"
-                          >
-                            Đăng nhập
-                          </Link>
-                        </Button>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Button
-                          className="w-full"
-                          onClick={() => setOpen(false)}
-                        >
-                          <Link
-                            href="/auth/register"
-                            className="flex w-full items-center justify-center"
-                          >
-                            Dùng thử miễn phí
-                          </Link>
-                        </Button>
-                      </SheetClose>
-                    </>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+                        </SheetClose>
+                      ))}
+                    </nav>
+                    <div className="flex flex-col gap-4 mt-4">
+                      {session ? (
+                        <>
+                          <SheetClose asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => setOpen(false)}
+                            >
+                              <Link
+                                href="/dashboard"
+                                className="flex w-full items-center justify-center"
+                              >
+                                Trang chủ
+                              </Link>
+                            </Button>
+                          </SheetClose>
+                          <div className="flex items-center gap-3 px-1 py-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={
+                                  session.user.image ||
+                                  `/api/avatar?name=${encodeURIComponent(session.user?.name || "User")}`
+                                }
+                                alt={session.user.name || "Người dùng"}
+                              />
+                              <AvatarFallback>{avatarFallback}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">
+                                {session.user.name || "Người dùng"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {session.user.email}
+                              </span>
+                            </div>
+                          </div>
+                          <SheetClose asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full flex items-center justify-start gap-2"
+                              onClick={() => setOpen(false)}
+                            >
+                              <Sparkles className="h-4 w-4" />
+                              <span>Nâng cấp lên Pro</span>
+                            </Button>
+                          </SheetClose>
+                          <div className="flex flex-col gap-2">
+                            <SheetClose asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full flex items-center justify-start gap-2"
+                                onClick={() => setOpen(false)}
+                              >
+                                <BadgeCheck className="h-4 w-4" />
+                                <span>Tài khoản</span>
+                              </Button>
+                            </SheetClose>
+                            <SheetClose asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full flex items-center justify-start gap-2"
+                                onClick={() => setOpen(false)}
+                              >
+                                <CreditCard className="h-4 w-4" />
+                                <span>Thanh toán</span>
+                              </Button>
+                            </SheetClose>
+                            <SheetClose asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full flex items-center justify-start gap-2"
+                                onClick={() => setOpen(false)}
+                              >
+                                <Bell className="h-4 w-4" />
+                                <span>Thông báo</span>
+                              </Button>
+                            </SheetClose>
+                          </div>
+                          <SheetClose asChild>
+                            <Button
+                              variant="secondary"
+                              className="w-full flex items-center justify-start gap-2"
+                              onClick={handleSignOut}
+                            >
+                              <LogOut className="h-4 w-4" />
+                              <span>Đăng xuất</span>
+                            </Button>
+                          </SheetClose>
+                        </>
+                      ) : (
+                        <>
+                          <SheetClose asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => setOpen(false)}
+                            >
+                              <Link
+                                href="/auth/login"
+                                className="flex w-full items-center justify-center"
+                              >
+                                Đăng nhập
+                              </Link>
+                            </Button>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Button
+                              className="w-full"
+                              onClick={() => setOpen(false)}
+                            >
+                              <Link
+                                href="/auth/register"
+                                className="flex w-full items-center justify-center"
+                              >
+                                Dùng thử miễn phí
+                              </Link>
+                            </Button>
+                          </SheetClose>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+          )}
         </div>
       </div>
     </motion.header>
