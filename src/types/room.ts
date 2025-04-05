@@ -84,10 +84,10 @@ export interface RoomCategoryStore {
   // Form management functions - Tạo mới
   setCreateRoomCategoryForm: (
     field: keyof CreateRoomCategoryForm,
-    value: string | number | File | null
+    value: string | number | File | null,
   ) => void;
   validateCreateRoomCategoryField: (
-    field: keyof CreateRoomCategoryForm
+    field: keyof CreateRoomCategoryForm,
   ) => boolean;
   validateAllCreateRoomCategoryFields: () => boolean;
   resetCreateRoomCategoryForm: () => void;
@@ -96,10 +96,10 @@ export interface RoomCategoryStore {
   // Form management functions - Cập nhật
   setUpdateRoomCategoryForm: (
     field: keyof UpdateRoomCategoryForm,
-    value: string | number | File | null
+    value: string | number | File | null,
   ) => void;
   validateUpdateRoomCategoryField: (
-    field: keyof UpdateRoomCategoryForm
+    field: keyof UpdateRoomCategoryForm,
   ) => boolean;
   validateAllUpdateRoomCategoryFields: () => boolean;
   resetUpdateRoomCategoryForm: () => void;

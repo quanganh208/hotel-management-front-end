@@ -30,12 +30,12 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import Header from "@/components/header";
-import { CreateRoomCategoryDialog } from "@/components/rooms/create-room-category-dialog";
-import { RoomCategoryDetailDialog } from "@/components/rooms/room-category-detail-dialog";
 import { useRoomCategoryStore } from "@/store/room-categories";
 import { RoomCategory } from "@/types/room";
 import { toast } from "sonner";
 import { useTitle } from "@/hooks/use-title";
+import { CreateRoomCategoryDialog } from "@/components/hotels/rooms/create-room-category-dialog";
+import { RoomCategoryDetailDialog } from "@/components/hotels/rooms/room-category-detail-dialog";
 
 // Animation variants
 const containerVariants = {
@@ -71,7 +71,7 @@ export default function RoomCategoriesPage() {
     useRoomCategoryStore();
 
   const [selectedCategory, setSelectedCategory] = useState<RoomCategory | null>(
-    null
+    null,
   );
   const [detailOpen, setDetailOpen] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
@@ -102,7 +102,7 @@ export default function RoomCategoriesPage() {
 
   // Filter to only show categories for this hotel
   const filteredCategories = roomCategories.filter(
-    (category) => category.hotelId === hotelId
+    (category) => category.hotelId === hotelId,
   );
 
   return (
@@ -246,17 +246,17 @@ export default function RoomCategoriesPage() {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.pricePerHour
+                                      category.pricePerHour,
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.pricePerDay
+                                      category.pricePerDay,
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.priceOvernight
+                                      category.priceOvernight,
                                     )}
                                   </TableCell>
                                 </motion.tr>
