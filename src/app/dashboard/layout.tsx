@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import LoadingPage from "@/components/ui/loading-page";
 
@@ -18,7 +17,6 @@ export default function DashboardLayout({
       <Suspense fallback={<LoadingPage text="Đang tải dashboard..." />}>
         {children}
       </Suspense>
-      <Toaster />
     </div>
   );
 }

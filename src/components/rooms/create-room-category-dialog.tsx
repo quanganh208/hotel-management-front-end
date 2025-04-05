@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, Plus, X } from "lucide-react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,10 @@ import { useRoomCategoryStore } from "@/store/room-categories";
 
 export function CreateRoomCategoryDialog() {
   const [open, setOpen] = useState(false);
+  const params = useParams();
+  const hotelId = params.id as string;
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
   const {
     createRoomCategoryForm,
     createRoomCategoryFormErrors,
@@ -28,14 +33,36 @@ export function CreateRoomCategoryDialog() {
     error,
     success,
     setCreateRoomCategoryForm,
+    validateCreateRoomCategoryField,
     createRoomCategory,
     resetCreateRoomCategoryForm,
     resetMessages,
-    fetchRoomCategories,
   } = useRoomCategoryStore();
 
   const dialogRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Thiết lập hotelId khi dialog mở
+  useEffect(() => {
+    if (open && hotelId) {
+      setCreateRoomCategoryForm("hotelId", hotelId);
+    }
+  }, [open, hotelId, setCreateRoomCategoryForm]);
+
+  // Cập nhật URL preview khi hình ảnh thay đổi
+  useEffect(() => {
+    if (createRoomCategoryForm.image) {
+      const url = URL.createObjectURL(createRoomCategoryForm.image);
+      setImagePreviewUrl(url);
+
+      // Cleanup function để giải phóng URL khi component unmount hoặc ảnh thay đổi
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setImagePreviewUrl(null);
+    }
+  }, [createRoomCategoryForm.image]);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
@@ -76,20 +103,14 @@ export function CreateRoomCategoryDialog() {
     setCreateRoomCategoryForm("image", null);
   };
 
+  // Xử lý khi thành công hoặc lỗi
   useEffect(() => {
     if (success) {
-      toast.success(success);
       setOpen(false);
-      fetchRoomCategories();
       resetCreateRoomCategoryForm();
       resetMessages();
     }
-  }, [
-    success,
-    fetchRoomCategories,
-    resetCreateRoomCategoryForm,
-    resetMessages,
-  ]);
+  }, [success, hotelId, resetCreateRoomCategoryForm, resetMessages]);
 
   useEffect(() => {
     if (error) {
@@ -104,7 +125,10 @@ export function CreateRoomCategoryDialog() {
           <Plus className="mr-2 h-4 w-4" /> Thêm hạng phòng
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]" ref={dialogRef}>
+      <DialogContent
+        className="sm:max-w-[650px] [&>button]:hidden"
+        ref={dialogRef}
+      >
         <DialogHeader>
           <DialogTitle>Thêm hạng phòng mới</DialogTitle>
           <DialogDescription>
@@ -120,6 +144,7 @@ export function CreateRoomCategoryDialog() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setCreateRoomCategoryForm("name", e.target.value)
               }
+              onBlur={() => validateCreateRoomCategoryField("name")}
               className={cn(
                 createRoomCategoryFormErrors.name && "border-destructive"
               )}
@@ -139,6 +164,7 @@ export function CreateRoomCategoryDialog() {
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setCreateRoomCategoryForm("description", e.target.value)
               }
+              onBlur={() => validateCreateRoomCategoryField("description")}
               className={cn(
                 createRoomCategoryFormErrors.description && "border-destructive"
               )}
@@ -153,12 +179,12 @@ export function CreateRoomCategoryDialog() {
           </div>
 
           <div className="grid gap-2">
-            <Label>Ảnh hạng phòng (không bắt buộc)</Label>
+            <Label>Ảnh hạng phòng</Label>
             <div className="flex flex-col gap-4">
-              {createRoomCategoryForm.image ? (
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+              {createRoomCategoryForm.image && imagePreviewUrl ? (
+                <div className="relative aspect-video max-w-md mx-auto w-full overflow-hidden rounded-lg border">
                   <Image
-                    src={URL.createObjectURL(createRoomCategoryForm.image)}
+                    src={imagePreviewUrl}
                     alt="Preview"
                     fill
                     className="object-cover"
@@ -180,7 +206,7 @@ export function CreateRoomCategoryDialog() {
                 <label
                   htmlFor="image"
                   className={cn(
-                    "flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-accent/50",
+                    "flex aspect-video max-w-md mx-auto w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-accent/50",
                     createRoomCategoryFormErrors.image && "border-destructive"
                   )}
                 >
@@ -209,115 +235,99 @@ export function CreateRoomCategoryDialog() {
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="roomCount">Số lượng phòng</Label>
-            <Input
-              id="roomCount"
-              type="number"
-              min="1"
-              value={createRoomCategoryForm.roomCount}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setCreateRoomCategoryForm(
-                  "roomCount",
-                  parseInt(e.target.value) || 0
-                )
-              }
-              className={cn(
-                createRoomCategoryFormErrors.roomCount && "border-destructive"
-              )}
-              disabled={isLoading}
-            />
-            {createRoomCategoryFormErrors.roomCount && (
-              <p className="text-sm text-destructive">
-                {createRoomCategoryFormErrors.roomCount}
-              </p>
-            )}
-          </div>
-
           <div className="grid grid-cols-3 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="hourlyPrice">Giá giờ (VNĐ)</Label>
+              <Label htmlFor="pricePerHour">Giá giờ (VNĐ)</Label>
               <Input
-                id="hourlyPrice"
+                id="pricePerHour"
                 type="number"
                 min="0"
-                value={createRoomCategoryForm.hourlyPrice}
+                value={createRoomCategoryForm.pricePerHour || ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCreateRoomCategoryForm(
-                    "hourlyPrice",
+                    "pricePerHour",
                     parseInt(e.target.value) || 0
                   )
                 }
+                onBlur={() => validateCreateRoomCategoryField("pricePerHour")}
                 className={cn(
-                  createRoomCategoryFormErrors.hourlyPrice &&
+                  createRoomCategoryFormErrors.pricePerHour &&
                     "border-destructive"
                 )}
                 disabled={isLoading}
               />
-              {createRoomCategoryFormErrors.hourlyPrice && (
-                <p className="text-sm text-destructive">
-                  {createRoomCategoryFormErrors.hourlyPrice}
-                </p>
-              )}
+              <div className="min-h-[20px]">
+                {createRoomCategoryFormErrors.pricePerHour && (
+                  <p className="text-sm text-destructive">
+                    {createRoomCategoryFormErrors.pricePerHour}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="dailyPrice">Giá cả ngày (VNĐ)</Label>
+              <Label htmlFor="pricePerDay">Giá ngày (VNĐ)</Label>
               <Input
-                id="dailyPrice"
+                id="pricePerDay"
                 type="number"
                 min="0"
-                value={createRoomCategoryForm.dailyPrice}
+                value={createRoomCategoryForm.pricePerDay || ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCreateRoomCategoryForm(
-                    "dailyPrice",
+                    "pricePerDay",
                     parseInt(e.target.value) || 0
                   )
                 }
+                onBlur={() => validateCreateRoomCategoryField("pricePerDay")}
                 className={cn(
-                  createRoomCategoryFormErrors.dailyPrice &&
+                  createRoomCategoryFormErrors.pricePerDay &&
                     "border-destructive"
                 )}
                 disabled={isLoading}
               />
-              {createRoomCategoryFormErrors.dailyPrice && (
-                <p className="text-sm text-destructive">
-                  {createRoomCategoryFormErrors.dailyPrice}
-                </p>
-              )}
+              <div className="min-h-[20px]">
+                {createRoomCategoryFormErrors.pricePerDay && (
+                  <p className="text-sm text-destructive">
+                    {createRoomCategoryFormErrors.pricePerDay}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="overnightPrice">Giá qua đêm (VNĐ)</Label>
+              <Label htmlFor="priceOvernight">Giá qua đêm (VNĐ)</Label>
               <Input
-                id="overnightPrice"
+                id="priceOvernight"
                 type="number"
                 min="0"
-                value={createRoomCategoryForm.overnightPrice}
+                value={createRoomCategoryForm.priceOvernight || ""}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCreateRoomCategoryForm(
-                    "overnightPrice",
+                    "priceOvernight",
                     parseInt(e.target.value) || 0
                   )
                 }
+                onBlur={() => validateCreateRoomCategoryField("priceOvernight")}
                 className={cn(
-                  createRoomCategoryFormErrors.overnightPrice &&
+                  createRoomCategoryFormErrors.priceOvernight &&
                     "border-destructive"
                 )}
                 disabled={isLoading}
               />
-              {createRoomCategoryFormErrors.overnightPrice && (
-                <p className="text-sm text-destructive">
-                  {createRoomCategoryFormErrors.overnightPrice}
-                </p>
-              )}
+              <div className="min-h-[20px]">
+                {createRoomCategoryFormErrors.priceOvernight && (
+                  <p className="text-sm text-destructive">
+                    {createRoomCategoryFormErrors.priceOvernight}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button
               type="button"
               variant="outline"
+              onClick={() => setOpen(false)}
               disabled={isLoading}
-              onClick={() => handleOpenChange(false)}
             >
               Hủy
             </Button>
@@ -325,10 +335,10 @@ export function CreateRoomCategoryDialog() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang tạo...
+                  Đang xử lý...
                 </>
               ) : (
-                "Tạo hạng phòng"
+                "Thêm hạng phòng"
               )}
             </Button>
           </DialogFooter>

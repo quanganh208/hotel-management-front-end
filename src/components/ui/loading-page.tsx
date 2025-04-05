@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useTitle } from "@/hooks/use-title";
 
 interface LoadingPageProps {
   className?: string;
@@ -17,13 +17,7 @@ export default function LoadingPage({
   text = "Đang tải...",
   title = "Đang tải",
 }: LoadingPageProps) {
-  useEffect(() => {
-    document.title = title;
-    return () => {
-      document.title = "Đang tải";
-    };
-  }, [title]);
-
+  useTitle(title);
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center">
       <Loader2

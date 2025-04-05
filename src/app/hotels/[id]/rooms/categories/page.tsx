@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { formatNumberWithCommas } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -31,33 +34,76 @@ import { CreateRoomCategoryDialog } from "@/components/rooms/create-room-categor
 import { RoomCategoryDetailDialog } from "@/components/rooms/room-category-detail-dialog";
 import { useRoomCategoryStore } from "@/store/room-categories";
 import { RoomCategory } from "@/types/room";
+import { toast } from "sonner";
+import { useTitle } from "@/hooks/use-title";
 
-export default function RoomCategoriesPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const {
-    roomCategories,
-    isLoading,
-    error,
-    fetchRoomCategories,
-    isInitialized,
-  } = useRoomCategoryStore();
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 12,
+      stiffness: 200,
+    },
+  },
+};
+
+export default function RoomCategoriesPage() {
+  const params = useParams();
+  const hotelId = params?.id as string;
+
+  useTitle("Danh sách hạng phòng | HotelManager Pro");
+
+  const { roomCategories, error, fetchRoomCategories, isFetching } =
+    useRoomCategoryStore();
 
   const [selectedCategory, setSelectedCategory] = useState<RoomCategory | null>(
     null
   );
   const [detailOpen, setDetailOpen] = useState(false);
+  const [isLoadingLocal, setIsLoadingLocal] = useState(false);
+
+  const loadData = useCallback(async () => {
+    if (!hotelId) return;
+
+    try {
+      setIsLoadingLocal(true);
+      await fetchRoomCategories(hotelId);
+    } catch (error) {
+      toast.error("Không thể tải danh sách hạng phòng");
+      console.error("Error fetching room categories:", error);
+    } finally {
+      setIsLoadingLocal(false);
+    }
+  }, [fetchRoomCategories, hotelId]);
 
   useEffect(() => {
-    fetchRoomCategories().then((r) => r);
-  }, [fetchRoomCategories]);
+    // Luôn load dữ liệu khi component mount
+    loadData();
+  }, [loadData]);
 
   const handleRowClick = (category: RoomCategory) => {
     setSelectedCategory(category);
     setDetailOpen(true);
   };
+
+  // Filter to only show categories for this hotel
+  const filteredCategories = roomCategories.filter(
+    (category) => category.hotelId === hotelId
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -85,89 +131,144 @@ export default function RoomCategoriesPage({
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="min-h-[100vh] flex-1 rounded-xl bg-background md:min-h-min p-6">
               <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Danh sách hạng phòng</h1>
+                <motion.h1
+                  className="text-2xl font-bold"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  Danh sách hạng phòng
+                </motion.h1>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
                 >
                   <CreateRoomCategoryDialog />
                 </motion.div>
               </div>
 
-              {isLoading ? (
-                <div className="flex items-center justify-center h-[400px]">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : error ? (
-                <div className="flex items-center justify-center h-[400px] text-destructive">
-                  {error}
-                </div>
-              ) : !isInitialized ? (
-                <div className="flex items-center justify-center h-[400px]">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-medium">
-                          Tên hạng phòng
-                        </TableHead>
-                        <TableHead className="font-medium">Mô tả</TableHead>
-                        <TableHead className="font-medium text-center">
-                          Số lượng phòng
-                        </TableHead>
-                        <TableHead className="font-medium text-right">
-                          Giá giờ (VNĐ)
-                        </TableHead>
-                        <TableHead className="font-medium text-right">
-                          Giá cả ngày (VNĐ)
-                        </TableHead>
-                        <TableHead className="font-medium text-right">
-                          Giá qua đêm (VNĐ)
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {roomCategories.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center h-24">
-                            Chưa có hạng phòng nào. Hãy tạo hạng phòng đầu tiên.
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        roomCategories.map((category) => (
-                          <TableRow
-                            key={category._id}
-                            className="cursor-pointer hover:bg-muted/50"
-                            onClick={() => handleRowClick(category)}
-                          >
-                            <TableCell className="font-medium">
-                              {category.name}
-                            </TableCell>
-                            <TableCell className="max-w-xs truncate">
-                              {category.description}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {category.roomCount}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {formatNumberWithCommas(category.hourlyPrice)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {formatNumberWithCommas(category.dailyPrice)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {formatNumberWithCommas(category.overnightPrice)}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
+              <AnimatePresence mode="wait">
+                {isLoadingLocal || isFetching ? (
+                  <motion.div
+                    key="loading"
+                    className="flex items-center justify-center h-[400px]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </motion.div>
+                ) : error ? (
+                  <motion.div
+                    key="error"
+                    className="flex flex-col items-center justify-center h-[400px] text-destructive gap-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <p>{error}</p>
+                    <Button variant="outline" onClick={loadData}>
+                      Thử lại
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="content"
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                  >
+                    {filteredCategories.length === 0 ? (
+                      <motion.div
+                        variants={itemVariants}
+                        className="flex flex-col items-center justify-center h-[400px] text-muted-foreground"
+                      >
+                        <p className="text-lg">Chưa có hạng phòng nào</p>
+                        <p className="text-sm mt-2">
+                          Hãy tạo hạng phòng đầu tiên
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        className="rounded-md border"
+                        variants={itemVariants}
+                      >
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="font-medium">
+                                Tên hạng phòng
+                              </TableHead>
+                              <TableHead className="font-medium">
+                                Mô tả
+                              </TableHead>
+                              <TableHead className="font-medium text-center">
+                                Số lượng phòng
+                              </TableHead>
+                              <TableHead className="font-medium text-right">
+                                Giá giờ (VNĐ)
+                              </TableHead>
+                              <TableHead className="font-medium text-right">
+                                Giá cả ngày (VNĐ)
+                              </TableHead>
+                              <TableHead className="font-medium text-right">
+                                Giá qua đêm (VNĐ)
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <AnimatePresence>
+                              {filteredCategories.map((category) => (
+                                <motion.tr
+                                  key={category._id}
+                                  variants={itemVariants}
+                                  className="cursor-pointer hover:bg-muted/50"
+                                  onClick={() => handleRowClick(category)}
+                                  whileHover={{
+                                    backgroundColor: "rgba(0,0,0,0.05)",
+                                    transition: { duration: 0.2 },
+                                  }}
+                                  layout
+                                >
+                                  <TableCell className="font-medium">
+                                    {category.name}
+                                  </TableCell>
+                                  <TableCell className="max-w-xs truncate">
+                                    {category.description}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    {category.rooms.length}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {formatNumberWithCommas(
+                                      category.pricePerHour
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {formatNumberWithCommas(
+                                      category.pricePerDay
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {formatNumberWithCommas(
+                                      category.priceOvernight
+                                    )}
+                                  </TableCell>
+                                </motion.tr>
+                              ))}
+                            </AnimatePresence>
+                          </TableBody>
+                        </Table>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </SidebarInset>

@@ -98,7 +98,10 @@ export function CreateHotelDialog() {
           <Plus className="mr-2 h-4 w-4" /> Thêm khách sạn
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]" ref={dialogRef}>
+      <DialogContent
+        className="sm:max-w-[425px] [&>button]:hidden"
+        ref={dialogRef}
+      >
         <DialogHeader>
           <DialogTitle>Thêm khách sạn mới</DialogTitle>
           <DialogDescription>
@@ -128,7 +131,7 @@ export function CreateHotelDialog() {
               value={createHotelForm.address}
               onChange={(e) => setCreateHotelForm("address", e.target.value)}
               className={cn(
-                createHotelFormErrors.address && "border-destructive",
+                createHotelFormErrors.address && "border-destructive"
               )}
               disabled={isLoading}
             />
@@ -167,7 +170,7 @@ export function CreateHotelDialog() {
                   htmlFor="image"
                   className={cn(
                     "flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-accent/50",
-                    createHotelFormErrors.image && "border-destructive",
+                    createHotelFormErrors.image && "border-destructive"
                   )}
                 >
                   <ImagePlus className="h-8 w-8" />
