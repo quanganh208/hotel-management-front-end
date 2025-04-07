@@ -90,12 +90,12 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
     try {
       // Gọi API
       const response = await axiosInstance.get(
-        `/room-types?hotelId=${hotelId}`
+        `/room-types?hotelId=${hotelId}`,
       );
 
       // Lọc loại bỏ dữ liệu cũ của khách sạn này
       const otherHotelsCategories = get().roomCategories.filter(
-        (cat) => cat.hotelId !== hotelId
+        (cat) => cat.hotelId !== hotelId,
       );
 
       // Cập nhật trạng thái
@@ -104,7 +104,7 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
         isFetching: false,
         lastFetchTimestamp: new Map(get().lastFetchTimestamp).set(
           hotelId,
-          Date.now()
+          Date.now(),
         ),
       });
     } catch (error: unknown) {
@@ -314,7 +314,7 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
       "priceOvernight",
     ];
     return fields.every((field) =>
-      get().validateCreateRoomCategoryField(field)
+      get().validateCreateRoomCategoryField(field),
     );
   },
 
@@ -328,7 +328,7 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
       "priceOvernight",
     ];
     return fields.every((field) =>
-      get().validateUpdateRoomCategoryField(field)
+      get().validateUpdateRoomCategoryField(field),
     );
   },
 
@@ -395,15 +395,15 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
       formData.append("name", createRoomCategoryForm.name);
       formData.append(
         "pricePerHour",
-        createRoomCategoryForm.pricePerHour.toString()
+        createRoomCategoryForm.pricePerHour.toString(),
       );
       formData.append(
         "pricePerDay",
-        createRoomCategoryForm.pricePerDay.toString()
+        createRoomCategoryForm.pricePerDay.toString(),
       );
       formData.append(
         "priceOvernight",
-        createRoomCategoryForm.priceOvernight.toString()
+        createRoomCategoryForm.priceOvernight.toString(),
       );
       formData.append("description", createRoomCategoryForm.description);
 
@@ -468,15 +468,15 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
       formData.append("name", updateRoomCategoryForm.name);
       formData.append(
         "pricePerHour",
-        updateRoomCategoryForm.pricePerHour.toString()
+        updateRoomCategoryForm.pricePerHour.toString(),
       );
       formData.append(
         "pricePerDay",
-        updateRoomCategoryForm.pricePerDay.toString()
+        updateRoomCategoryForm.pricePerDay.toString(),
       );
       formData.append(
         "priceOvernight",
-        updateRoomCategoryForm.priceOvernight.toString()
+        updateRoomCategoryForm.priceOvernight.toString(),
       );
       formData.append("description", updateRoomCategoryForm.description);
 
@@ -491,7 +491,7 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
-        }
+        },
       );
 
       // Xử lý kết quả
@@ -556,7 +556,7 @@ export const useRoomCategoryStore = create<RoomCategoryStore>((set, get) => ({
       // Cập nhật state
       set((state) => ({
         roomCategories: state.roomCategories.filter(
-          (category) => category._id !== categoryId
+          (category) => category._id !== categoryId,
         ),
         isLoading: false,
         success: successMessage,

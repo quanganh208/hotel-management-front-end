@@ -35,7 +35,7 @@ interface RoomFormEditProps {
   isLoading: boolean;
   setUpdateRoomForm: (
     field: keyof UpdateRoomForm,
-    value: string | File | null
+    value: string | File | null,
   ) => void;
   validateUpdateRoomField: (field: keyof UpdateRoomForm) => boolean;
   setIsEditing: (value: boolean) => void;
@@ -64,10 +64,10 @@ export const RoomFormEdit: React.FC<RoomFormEditProps> = ({
         setUpdateRoomForm("image", null);
         setUpdateRoomForm(
           "imageError",
-          "Định dạng file không được hỗ trợ. Vui lòng chọn file JPG, JPEG, PNG hoặc WEBP."
+          "Định dạng file không được hỗ trợ. Vui lòng chọn file JPG, JPEG, PNG hoặc WEBP.",
         );
         toast.error(
-          "Định dạng file không được hỗ trợ. Vui lòng chọn file JPG, JPEG, PNG hoặc WEBP."
+          "Định dạng file không được hỗ trợ. Vui lòng chọn file JPG, JPEG, PNG hoặc WEBP.",
         );
         return;
       }
@@ -78,7 +78,7 @@ export const RoomFormEdit: React.FC<RoomFormEditProps> = ({
         setUpdateRoomForm("image", null);
         setUpdateRoomForm(
           "imageError",
-          "Kích thước file không được vượt quá 10MB."
+          "Kích thước file không được vượt quá 10MB.",
         );
         toast.error("Kích thước file không được vượt quá 10MB.");
         return;
@@ -117,7 +117,7 @@ export const RoomFormEdit: React.FC<RoomFormEditProps> = ({
                 onBlur={() => validateUpdateRoomField("roomNumber")}
                 className={cn(
                   "h-9",
-                  updateRoomFormErrors.roomNumber && "border-destructive"
+                  updateRoomFormErrors.roomNumber && "border-destructive",
                 )}
                 disabled={isLoading}
               />
@@ -141,7 +141,7 @@ export const RoomFormEdit: React.FC<RoomFormEditProps> = ({
                 onBlur={() => validateUpdateRoomField("floor")}
                 className={cn(
                   "h-9",
-                  updateRoomFormErrors.floor && "border-destructive"
+                  updateRoomFormErrors.floor && "border-destructive",
                 )}
                 disabled={isLoading}
               />
@@ -219,7 +219,7 @@ export const RoomFormEdit: React.FC<RoomFormEditProps> = ({
                 <SelectTrigger
                   id="roomTypeId"
                   className={cn(
-                    updateRoomFormErrors.roomTypeId && "border-destructive"
+                    updateRoomFormErrors.roomTypeId && "border-destructive",
                   )}
                 >
                   <SelectValue placeholder="Chọn hạng phòng" />

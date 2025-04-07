@@ -68,7 +68,7 @@ export default function RoomCategoriesPage() {
     useRoomCategoryStore();
 
   const [selectedCategory, setSelectedCategory] = useState<RoomCategory | null>(
-    null
+    null,
   );
   const [detailOpen, setDetailOpen] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
@@ -99,7 +99,7 @@ export default function RoomCategoriesPage() {
 
   // Filter to only show categories for this hotel
   const filteredCategories = roomCategories.filter(
-    (category) => category.hotelId === hotelId
+    (category) => category.hotelId === hotelId,
   );
 
   return (
@@ -243,17 +243,17 @@ export default function RoomCategoriesPage() {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.pricePerHour
+                                      category.pricePerHour,
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.pricePerDay
+                                      category.pricePerDay,
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.priceOvernight
+                                      category.priceOvernight,
                                     )}
                                   </TableCell>
                                 </motion.tr>

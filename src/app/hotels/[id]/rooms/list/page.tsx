@@ -296,21 +296,21 @@ export default function RoomsPage() {
                                   <TableCell className="text-right">
                                     {room.roomTypeId?.pricePerHour
                                       ? formatNumberWithCommas(
-                                          room.roomTypeId.pricePerHour
+                                          room.roomTypeId.pricePerHour,
                                         )
                                       : "N/A"}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {room.roomTypeId?.pricePerDay
                                       ? formatNumberWithCommas(
-                                          room.roomTypeId.pricePerDay
+                                          room.roomTypeId.pricePerDay,
                                         )
                                       : "N/A"}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {room.roomTypeId?.priceOvernight
                                       ? formatNumberWithCommas(
-                                          room.roomTypeId.priceOvernight
+                                          room.roomTypeId.priceOvernight,
                                         )
                                       : "N/A"}
                                   </TableCell>
@@ -318,7 +318,7 @@ export default function RoomsPage() {
                                     <Badge
                                       variant="outline"
                                       className={`${getStatusColor(
-                                        room.status
+                                        room.status,
                                       )} text-white`}
                                     >
                                       {getStatusText(room.status)}

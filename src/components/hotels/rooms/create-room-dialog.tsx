@@ -155,7 +155,7 @@ export function CreateRoomDialog() {
 
   // Lọc danh sách hạng phòng cho khách sạn hiện tại
   const filteredCategories = roomCategories.filter(
-    (category) => category.hotelId === hotelId
+    (category) => category.hotelId === hotelId,
   );
 
   return (
@@ -187,7 +187,7 @@ export function CreateRoomDialog() {
                 }
                 onBlur={() => validateCreateRoomField("roomNumber")}
                 className={cn(
-                  createRoomFormErrors.roomNumber && "border-destructive"
+                  createRoomFormErrors.roomNumber && "border-destructive",
                 )}
                 disabled={isLoading}
               />
@@ -209,7 +209,7 @@ export function CreateRoomDialog() {
                 }
                 onBlur={() => validateCreateRoomField("floor")}
                 className={cn(
-                  createRoomFormErrors.floor && "border-destructive"
+                  createRoomFormErrors.floor && "border-destructive",
                 )}
                 disabled={isLoading}
               />
@@ -241,7 +241,7 @@ export function CreateRoomDialog() {
             >
               <SelectTrigger
                 className={cn(
-                  createRoomFormErrors.roomTypeId && "border-destructive"
+                  createRoomFormErrors.roomTypeId && "border-destructive",
                 )}
               >
                 <SelectValue placeholder="Chọn hạng phòng" />
@@ -306,7 +306,7 @@ export function CreateRoomDialog() {
                   htmlFor="image"
                   className={cn(
                     "flex aspect-video max-w-md mx-auto w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-accent/50",
-                    createRoomFormErrors.image && "border-destructive"
+                    createRoomFormErrors.image && "border-destructive",
                   )}
                 >
                   <ImagePlus className="h-8 w-8" />

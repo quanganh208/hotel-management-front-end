@@ -75,7 +75,7 @@ export function RoomDetailDialog({
 
   // Lọc danh sách hạng phòng cho khách sạn hiện tại
   const filteredCategories = roomCategories.filter(
-    (category) => category.hotelId === hotelId
+    (category) => category.hotelId === hotelId,
   );
 
   // Load dữ liệu khi dialog mở
@@ -128,7 +128,7 @@ export function RoomDetailDialog({
   const handleSave = async () => {
     if (!room._id) return;
 
-     await updateRoom(room._id);
+    await updateRoom(room._id);
   };
 
   const handleUpdate = () => {

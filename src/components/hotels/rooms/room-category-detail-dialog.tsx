@@ -247,7 +247,7 @@ export function RoomCategoryDetailDialog({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     let parsedValue: string | number = value;
@@ -260,7 +260,7 @@ export function RoomCategoryDetailDialog({
     // Cập nhật giá trị vào form
     setUpdateRoomCategoryForm(
       name as keyof typeof updateRoomCategoryForm,
-      parsedValue
+      parsedValue,
     );
   };
 
@@ -291,7 +291,7 @@ export function RoomCategoryDetailDialog({
                     onChange={handleChange}
                     onBlur={() => validateUpdateRoomCategoryField("name")}
                     className={cn(
-                      updateRoomCategoryFormErrors.name && "border-destructive"
+                      updateRoomCategoryFormErrors.name && "border-destructive",
                     )}
                   />
                   {updateRoomCategoryFormErrors.name && (
@@ -313,7 +313,7 @@ export function RoomCategoryDetailDialog({
                     }
                     className={cn(
                       updateRoomCategoryFormErrors.description &&
-                        "border-destructive"
+                        "border-destructive",
                     )}
                     rows={3}
                   />
@@ -338,7 +338,7 @@ export function RoomCategoryDetailDialog({
                       }
                       className={cn(
                         updateRoomCategoryFormErrors.pricePerHour &&
-                          "border-destructive"
+                          "border-destructive",
                       )}
                     />
                     {updateRoomCategoryFormErrors.pricePerHour && (
@@ -361,7 +361,7 @@ export function RoomCategoryDetailDialog({
                       }
                       className={cn(
                         updateRoomCategoryFormErrors.pricePerDay &&
-                          "border-destructive"
+                          "border-destructive",
                       )}
                     />
                     {updateRoomCategoryFormErrors.pricePerDay && (
@@ -384,7 +384,7 @@ export function RoomCategoryDetailDialog({
                       }
                       className={cn(
                         updateRoomCategoryFormErrors.priceOvernight &&
-                          "border-destructive"
+                          "border-destructive",
                       )}
                     />
                     {updateRoomCategoryFormErrors.priceOvernight && (
@@ -648,7 +648,7 @@ export function RoomCategoryDetailDialog({
                               <Badge
                                 variant="outline"
                                 className={`${getStatusColor(
-                                  room.status
+                                  room.status,
                                 )} text-white`}
                               >
                                 {getStatusText(room.status)}

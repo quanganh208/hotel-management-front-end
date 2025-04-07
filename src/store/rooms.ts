@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import axiosInstance from "@/lib/axios";
 import {
-  RoomFormErrors, RoomStatus,
+  RoomFormErrors,
+  RoomStatus,
   RoomStore,
   RoomWithType,
   UpdateRoomForm,
@@ -86,7 +87,7 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
         isFetching: false,
         lastFetchTimestamp: new Map(get().lastFetchTimestamp).set(
           hotelId,
-          Date.now()
+          Date.now(),
         ),
       });
     } catch (error: unknown) {
@@ -428,7 +429,7 @@ export const useRoomStore = create<RoomStore>((set, get) => ({
                   ...response.data, // Cập nhật với dữ liệu mới từ API
                   roomTypeId: room.roomTypeId, // Giữ nguyên object roomTypeId
                 }
-              : room
+              : room,
           ),
         }));
       }
