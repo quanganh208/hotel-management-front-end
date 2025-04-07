@@ -114,9 +114,10 @@ export function CreateRoomCategoryDialog() {
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      // Không cần gọi toast.error(error) ở đây vì đã được xử lý trong store
+      resetMessages();
     }
-  }, [error]);
+  }, [error, resetMessages]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -146,7 +147,7 @@ export function CreateRoomCategoryDialog() {
               }
               onBlur={() => validateCreateRoomCategoryField("name")}
               className={cn(
-                createRoomCategoryFormErrors.name && "border-destructive",
+                createRoomCategoryFormErrors.name && "border-destructive"
               )}
               disabled={isLoading}
             />
@@ -166,8 +167,7 @@ export function CreateRoomCategoryDialog() {
               }
               onBlur={() => validateCreateRoomCategoryField("description")}
               className={cn(
-                createRoomCategoryFormErrors.description &&
-                  "border-destructive",
+                createRoomCategoryFormErrors.description && "border-destructive"
               )}
               disabled={isLoading}
               rows={3}
@@ -208,7 +208,7 @@ export function CreateRoomCategoryDialog() {
                   htmlFor="image"
                   className={cn(
                     "flex aspect-video max-w-md mx-auto w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-accent/50",
-                    createRoomCategoryFormErrors.image && "border-destructive",
+                    createRoomCategoryFormErrors.image && "border-destructive"
                   )}
                 >
                   <ImagePlus className="h-8 w-8" />
@@ -247,13 +247,13 @@ export function CreateRoomCategoryDialog() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCreateRoomCategoryForm(
                     "pricePerHour",
-                    parseInt(e.target.value) || 0,
+                    parseInt(e.target.value) || 0
                   )
                 }
                 onBlur={() => validateCreateRoomCategoryField("pricePerHour")}
                 className={cn(
                   createRoomCategoryFormErrors.pricePerHour &&
-                    "border-destructive",
+                    "border-destructive"
                 )}
                 disabled={isLoading}
               />
@@ -275,13 +275,13 @@ export function CreateRoomCategoryDialog() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCreateRoomCategoryForm(
                     "pricePerDay",
-                    parseInt(e.target.value) || 0,
+                    parseInt(e.target.value) || 0
                   )
                 }
                 onBlur={() => validateCreateRoomCategoryField("pricePerDay")}
                 className={cn(
                   createRoomCategoryFormErrors.pricePerDay &&
-                    "border-destructive",
+                    "border-destructive"
                 )}
                 disabled={isLoading}
               />
@@ -303,13 +303,13 @@ export function CreateRoomCategoryDialog() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCreateRoomCategoryForm(
                     "priceOvernight",
-                    parseInt(e.target.value) || 0,
+                    parseInt(e.target.value) || 0
                   )
                 }
                 onBlur={() => validateCreateRoomCategoryField("priceOvernight")}
                 className={cn(
                   createRoomCategoryFormErrors.priceOvernight &&
-                    "border-destructive",
+                    "border-destructive"
                 )}
                 disabled={isLoading}
               />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { formatNumberWithCommas } from "@/lib/utils";
-import { RoomCategory, Room } from "@/types/room";
+import { RoomCategory, Room, RoomStatus } from "@/types/room";
 import { useRoomCategoryStore } from "@/store/room-categories";
 import { Edit, Trash, Save, X, Loader2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
@@ -34,7 +34,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -101,7 +100,7 @@ export function RoomCategoryDetailDialog({
   // Hiển thị lỗi nếu có
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      // Không cần gọi toast.error(error) ở đây vì đã được xử lý trong store
     }
   }, [error]);
 
@@ -122,12 +121,24 @@ export function RoomCategoryDetailDialog({
 
   const getStatusColor = (status: Room["status"]) => {
     switch (status) {
-      case "available":
+      case RoomStatus.AVAILABLE:
         return "bg-green-500";
-      case "occupied":
+      case RoomStatus.OCCUPIED:
+        return "bg-purple-500";
+      case RoomStatus.BOOKED:
+        return "bg-blue-500";
+      case RoomStatus.CHECKED_IN:
+        return "bg-indigo-500";
+      case RoomStatus.CHECKED_OUT:
+        return "bg-amber-500";
+      case RoomStatus.CLEANING:
+        return "bg-cyan-500";
+      case RoomStatus.MAINTENANCE:
         return "bg-red-500";
-      case "maintenance":
-        return "bg-yellow-500";
+      case RoomStatus.OUT_OF_SERVICE:
+        return "bg-gray-500";
+      case RoomStatus.RESERVED:
+        return "bg-teal-500";
       default:
         return "bg-gray-500";
     }
@@ -135,12 +146,24 @@ export function RoomCategoryDetailDialog({
 
   const getStatusText = (status: Room["status"]) => {
     switch (status) {
-      case "available":
+      case RoomStatus.AVAILABLE:
         return "Trống";
-      case "occupied":
+      case RoomStatus.OCCUPIED:
         return "Đang sử dụng";
-      case "maintenance":
+      case RoomStatus.BOOKED:
+        return "Đã đặt trước";
+      case RoomStatus.CHECKED_IN:
+        return "Đã nhận phòng";
+      case RoomStatus.CHECKED_OUT:
+        return "Đã trả phòng";
+      case RoomStatus.CLEANING:
+        return "Đang dọn dẹp";
+      case RoomStatus.MAINTENANCE:
         return "Bảo trì";
+      case RoomStatus.OUT_OF_SERVICE:
+        return "Ngừng sử dụng";
+      case RoomStatus.RESERVED:
+        return "Đã giữ chỗ";
       default:
         return "Không xác định";
     }
@@ -208,25 +231,23 @@ export function RoomCategoryDetailDialog({
       // Gọi API xóa và nhận kết quả
       const result = await deleteRoomCategory(category._id);
 
-      // Chỉ hiển thị toast nếu thành công
+      // Nếu thành công, đóng dialog
       if (result) {
         setIsDeleteOpen(false);
         onOpenChange(false);
-
         // Không cần gọi fetchRoomCategories ở đây vì state đã được cập nhật trong store
-      } else if (error) {
-        toast.error(error);
       }
+      // Không cần hiển thị toast.error(error) vì đã được xử lý trong store
     } catch (err) {
       console.error("Lỗi khi xóa hạng phòng:", err);
-      toast.error("Đã xảy ra lỗi khi xóa hạng phòng");
+      // Không cần thêm toast.error ở đây vì đã được xử lý trong store
     } finally {
       setIsDeleting(false);
     }
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     let parsedValue: string | number = value;
@@ -239,7 +260,7 @@ export function RoomCategoryDetailDialog({
     // Cập nhật giá trị vào form
     setUpdateRoomCategoryForm(
       name as keyof typeof updateRoomCategoryForm,
-      parsedValue,
+      parsedValue
     );
   };
 
@@ -247,7 +268,7 @@ export function RoomCategoryDetailDialog({
     <>
       <Dialog open={open} onOpenChange={isEditMode ? undefined : onOpenChange}>
         <DialogContent
-          className={`sm:max-w-[800px] h-[650px] overflow-hidden flex flex-col ${
+          className={`sm:max-w-[800px] h-[600px] overflow-hidden flex flex-col ${
             isEditMode ? "[&>button]:hidden" : ""
           }`}
         >
@@ -270,7 +291,7 @@ export function RoomCategoryDetailDialog({
                     onChange={handleChange}
                     onBlur={() => validateUpdateRoomCategoryField("name")}
                     className={cn(
-                      updateRoomCategoryFormErrors.name && "border-destructive",
+                      updateRoomCategoryFormErrors.name && "border-destructive"
                     )}
                   />
                   {updateRoomCategoryFormErrors.name && (
@@ -292,7 +313,7 @@ export function RoomCategoryDetailDialog({
                     }
                     className={cn(
                       updateRoomCategoryFormErrors.description &&
-                        "border-destructive",
+                        "border-destructive"
                     )}
                     rows={3}
                   />
@@ -317,7 +338,7 @@ export function RoomCategoryDetailDialog({
                       }
                       className={cn(
                         updateRoomCategoryFormErrors.pricePerHour &&
-                          "border-destructive",
+                          "border-destructive"
                       )}
                     />
                     {updateRoomCategoryFormErrors.pricePerHour && (
@@ -340,7 +361,7 @@ export function RoomCategoryDetailDialog({
                       }
                       className={cn(
                         updateRoomCategoryFormErrors.pricePerDay &&
-                          "border-destructive",
+                          "border-destructive"
                       )}
                     />
                     {updateRoomCategoryFormErrors.pricePerDay && (
@@ -363,7 +384,7 @@ export function RoomCategoryDetailDialog({
                       }
                       className={cn(
                         updateRoomCategoryFormErrors.priceOvernight &&
-                          "border-destructive",
+                          "border-destructive"
                       )}
                     />
                     {updateRoomCategoryFormErrors.priceOvernight && (
@@ -398,6 +419,9 @@ export function RoomCategoryDetailDialog({
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
+                        <p className="absolute bottom-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
+                          Ảnh thay thế
+                        </p>
                       </div>
                     ) : category.image ? (
                       <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg border">
@@ -510,9 +534,9 @@ export function RoomCategoryDetailDialog({
                   <div className="mt-2">
                     <h3 className="text-lg font-medium mb-3">Bảng giá</h3>
                     <div className="grid grid-cols-3 gap-4">
-                      <Card className="border-l-4 border-l-blue-500 shadow-sm gap-3">
-                        <CardHeader className="p-3 pb-1.5 flex flex-row items-center justify-between">
-                          <CardTitle className="text-sm">Giá giờ</CardTitle>
+                      <div className="border-l-4 border-l-blue-500 shadow-sm gap-3 p-3 rounded-md">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-sm font-medium">Giá giờ</p>
                           <div className="rounded-full bg-blue-100 p-1 text-blue-500">
                             <svg
                               className="h-5 w-5"
@@ -528,18 +552,18 @@ export function RoomCategoryDetailDialog({
                               />
                             </svg>
                           </div>
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                          <p className="text-sm font-semibold text-blue-600">
-                            {formatNumberWithCommas(category.pricePerHour)}{" "}
-                            <span className="text-xs font-normal">VNĐ</span>
-                          </p>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <p className="text-sm font-semibold text-blue-600">
+                          {category.pricePerHour
+                            ? formatNumberWithCommas(category.pricePerHour)
+                            : "N/A"}{" "}
+                          <span className="text-xs font-normal">VNĐ</span>
+                        </p>
+                      </div>
 
-                      <Card className="border-l-4 border-l-green-500 shadow-sm gap-3">
-                        <CardHeader className="p-3 pb-1.5 flex flex-row items-center justify-between">
-                          <CardTitle className="text-sm">Giá ngày</CardTitle>
+                      <div className="border-l-4 border-l-green-500 shadow-sm gap-3 p-3 rounded-md">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-sm font-medium">Giá ngày</p>
                           <div className="rounded-full bg-green-100 p-1 text-green-500">
                             <svg
                               className="h-5 w-5"
@@ -555,18 +579,18 @@ export function RoomCategoryDetailDialog({
                               />
                             </svg>
                           </div>
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                          <p className="text-sm font-semibold text-green-600">
-                            {formatNumberWithCommas(category.pricePerDay)}{" "}
-                            <span className="text-xs font-normal">VNĐ</span>
-                          </p>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <p className="text-sm font-semibold text-green-600">
+                          {category.pricePerDay
+                            ? formatNumberWithCommas(category.pricePerDay)
+                            : "N/A"}{" "}
+                          <span className="text-xs font-normal">VNĐ</span>
+                        </p>
+                      </div>
 
-                      <Card className="border-l-4 border-l-purple-500 shadow-sm gap-3">
-                        <CardHeader className="p-3 pb-1.5 flex flex-row items-center justify-between">
-                          <CardTitle className="text-sm">Giá đêm</CardTitle>
+                      <div className="border-l-4 border-l-purple-500 shadow-sm gap-3 p-3 rounded-md">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-sm font-medium">Giá đêm</p>
                           <div className="rounded-full bg-purple-100 p-1 text-purple-500">
                             <svg
                               className="h-5 w-5"
@@ -582,14 +606,14 @@ export function RoomCategoryDetailDialog({
                               />
                             </svg>
                           </div>
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                          <p className="text-sm font-semibold text-purple-600">
-                            {formatNumberWithCommas(category.priceOvernight)}{" "}
-                            <span className="text-xs font-normal">VNĐ</span>
-                          </p>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        <p className="text-sm font-semibold text-purple-600">
+                          {category.priceOvernight
+                            ? formatNumberWithCommas(category.priceOvernight)
+                            : "N/A"}{" "}
+                          <span className="text-xs font-normal">VNĐ</span>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -617,14 +641,14 @@ export function RoomCategoryDetailDialog({
                         rooms.map((room) => (
                           <TableRow key={room._id}>
                             <TableCell className="font-medium">
-                              {room.name}
+                              Phòng {room.roomNumber}
                             </TableCell>
-                            <TableCell>{room.area}</TableCell>
+                            <TableCell>Tầng {room.floor}</TableCell>
                             <TableCell>
                               <Badge
                                 variant="outline"
                                 className={`${getStatusColor(
-                                  room.status,
+                                  room.status
                                 )} text-white`}
                               >
                                 {getStatusText(room.status)}

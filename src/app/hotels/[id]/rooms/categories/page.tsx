@@ -33,7 +33,6 @@ import Header from "@/components/header";
 import { useRoomCategoryStore } from "@/store/room-categories";
 import { RoomCategory } from "@/types/room";
 import { toast } from "sonner";
-import { useTitle } from "@/hooks/use-title";
 import { CreateRoomCategoryDialog } from "@/components/hotels/rooms/create-room-category-dialog";
 import { RoomCategoryDetailDialog } from "@/components/hotels/rooms/room-category-detail-dialog";
 
@@ -65,13 +64,11 @@ export default function RoomCategoriesPage() {
   const params = useParams();
   const hotelId = params?.id as string;
 
-  useTitle("Danh sách hạng phòng | HotelManager Pro");
-
   const { roomCategories, error, fetchRoomCategories, isFetching } =
     useRoomCategoryStore();
 
   const [selectedCategory, setSelectedCategory] = useState<RoomCategory | null>(
-    null,
+    null
   );
   const [detailOpen, setDetailOpen] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
@@ -102,7 +99,7 @@ export default function RoomCategoriesPage() {
 
   // Filter to only show categories for this hotel
   const filteredCategories = roomCategories.filter(
-    (category) => category.hotelId === hotelId,
+    (category) => category.hotelId === hotelId
   );
 
   return (
@@ -227,7 +224,7 @@ export default function RoomCategoriesPage() {
                                 <motion.tr
                                   key={category._id}
                                   variants={itemVariants}
-                                  className="cursor-pointer hover:bg-muted/50"
+                                  className="cursor-pointer bg-muted/30"
                                   onClick={() => handleRowClick(category)}
                                   whileHover={{
                                     backgroundColor: "rgba(0,0,0,0.05)",
@@ -246,17 +243,17 @@ export default function RoomCategoriesPage() {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.pricePerHour,
+                                      category.pricePerHour
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.pricePerDay,
+                                      category.pricePerDay
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     {formatNumberWithCommas(
-                                      category.priceOvernight,
+                                      category.priceOvernight
                                     )}
                                   </TableCell>
                                 </motion.tr>

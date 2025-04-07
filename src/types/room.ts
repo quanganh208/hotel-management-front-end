@@ -1,3 +1,15 @@
+export enum RoomStatus {
+  AVAILABLE = "available", // Phòng sẵn sàng cho thuê
+  OCCUPIED = "occupied", // Đang có khách ở
+  BOOKED = "booked", // Đã được đặt trước nhưng khách chưa đến
+  CHECKED_IN = "checked_in", // Khách đã nhận phòng (check-in)
+  CHECKED_OUT = "checked_out", // Khách đã trả phòng (check-out), chờ dọn
+  CLEANING = "cleaning", // Phòng đang được dọn dẹp
+  MAINTENANCE = "maintenance", // Phòng đang sửa chữa, không thể sử dụng
+  OUT_OF_SERVICE = "out_of_service", // Phòng tạm ngừng sử dụng
+  RESERVED = "reserved", // Được giữ trước (booking nội bộ, khách VIP, v.v.)
+}
+
 export interface RoomCategory {
   _id: string;
   name: string;
@@ -14,10 +26,14 @@ export interface RoomCategory {
 
 export interface Room {
   _id: string;
-  name: string;
-  categoryId: string;
-  area: string;
-  status: "available" | "occupied" | "maintenance";
+  roomNumber: string;
+  roomTypeId: string;
+  floor: string;
+  status: RoomStatus;
+  note?: string;
+  hotelId: string;
+  image?: string;
+  bookings: Booking[];
   createdAt: string;
   updatedAt: string;
 }
@@ -84,10 +100,10 @@ export interface RoomCategoryStore {
   // Form management functions - Tạo mới
   setCreateRoomCategoryForm: (
     field: keyof CreateRoomCategoryForm,
-    value: string | number | File | null,
+    value: string | number | File | null
   ) => void;
   validateCreateRoomCategoryField: (
-    field: keyof CreateRoomCategoryForm,
+    field: keyof CreateRoomCategoryForm
   ) => boolean;
   validateAllCreateRoomCategoryFields: () => boolean;
   resetCreateRoomCategoryForm: () => void;
@@ -96,10 +112,10 @@ export interface RoomCategoryStore {
   // Form management functions - Cập nhật
   setUpdateRoomCategoryForm: (
     field: keyof UpdateRoomCategoryForm,
-    value: string | number | File | null,
+    value: string | number | File | null
   ) => void;
   validateUpdateRoomCategoryField: (
-    field: keyof UpdateRoomCategoryForm,
+    field: keyof UpdateRoomCategoryForm
   ) => boolean;
   validateAllUpdateRoomCategoryFields: () => boolean;
   resetUpdateRoomCategoryForm: () => void;
@@ -112,4 +128,105 @@ export interface RoomCategoryStore {
   setSuccess: (success: string | null) => void;
   resetMessages: () => void;
   getRoomsByCategory: (categoryId: string) => Room[];
+}
+
+export interface Booking {
+  _id: string;
+  roomId: string;
+  guestId: string;
+  checkIn: string;
+  checkOut: string;
+  status: string;
+  totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RoomWithType {
+  _id: string;
+  roomNumber: string;
+  roomTypeId: RoomCategory;
+  floor: string;
+  status: RoomStatus;
+  note?: string;
+  hotelId: string;
+  image?: string;
+  bookings: Booking[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRoomForm {
+  roomNumber: string;
+  roomTypeId: string;
+  floor: string;
+  hotelId: string;
+  note?: string;
+  image?: File | null;
+}
+
+export interface UpdateRoomForm {
+  roomNumber: string;
+  roomTypeId: string;
+  floor: string;
+  status: RoomStatus;
+  note?: string;
+  image?: File | null;
+  imageError?: string;
+}
+
+export interface RoomFormErrors {
+  roomNumber: string;
+  roomTypeId: string;
+  floor: string;
+  hotelId: string;
+  note?: string;
+  image?: string;
+}
+
+export interface RoomStore {
+  rooms: RoomWithType[];
+  isLoading: boolean;
+  error: string | null;
+  success: string | null;
+  isFetching: boolean;
+  lastFetchTimestamp: Map<string, number>;
+
+  // Form tạo mới
+  createRoomForm: CreateRoomForm;
+  createRoomFormErrors: RoomFormErrors;
+
+  // Form cập nhật
+  updateRoomForm: UpdateRoomForm;
+  updateRoomFormErrors: RoomFormErrors;
+
+  // API functions
+  fetchRooms: (hotelId: string) => Promise<void>;
+
+  // Form management functions - Tạo mới
+  setCreateRoomForm: (
+    field: keyof CreateRoomForm,
+    value: string | File | null
+  ) => void;
+  validateCreateRoomField: (field: keyof CreateRoomForm) => boolean;
+  validateAllCreateRoomFields: () => boolean;
+  resetCreateRoomForm: () => void;
+  createRoom: () => Promise<void>;
+
+  // Form management functions - Cập nhật
+  setUpdateRoomForm: (
+    field: keyof UpdateRoomForm,
+    value: string | File | null
+  ) => void;
+  validateUpdateRoomField: (field: keyof UpdateRoomForm) => boolean;
+  validateAllUpdateRoomFields: () => boolean;
+  resetUpdateRoomForm: () => void;
+  setUpdateFormFromRoom: (room: RoomWithType) => void;
+  updateRoom: (roomId: string) => Promise<boolean>;
+
+  // Utility functions
+  deleteRoom: (roomId: string) => Promise<boolean>;
+  setError: (error: string | null) => void;
+  setSuccess: (success: string | null) => void;
+  resetMessages: () => void;
 }
