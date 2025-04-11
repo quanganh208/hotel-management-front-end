@@ -254,7 +254,7 @@ export function RoomDetailDialog({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive hover:bg-destructive/90 text-white font-medium"
@@ -265,7 +265,7 @@ export function RoomDetailDialog({
                   Đang xử lý...
                 </>
               ) : (
-                "Xóa"
+                "Xác nhận xóa"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
