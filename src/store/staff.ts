@@ -572,6 +572,12 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       }));
 
       toast.success("Nhân viên đã được cập nhật thành công");
+
+      // Refresh danh sách nhân viên sau khi cập nhật thành công
+      if (staffHotelId) {
+        await get().fetchStaff(staffHotelId);
+      }
+
       return true;
     } catch (error: unknown) {
       console.error("Lỗi khi cập nhật nhân viên:", error);

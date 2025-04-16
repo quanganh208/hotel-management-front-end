@@ -87,16 +87,6 @@ const data = {
       title: "Nhân viên",
       url: "/hotels/[id]/staff",
       icon: Users,
-      items: [
-        {
-          title: "Danh sách nhân viên",
-          url: "/hotels/[id]/staff/list",
-        },
-        {
-          title: "Thiết lập nhân viên",
-          url: "/hotels/[id]/staff/settings",
-        },
-      ],
     },
     {
       title: "Báo cáo",
