@@ -615,6 +615,49 @@ export function CreateStaffDialog() {
                   className="space-y-4"
                 >
                   <Card className="border shadow-sm">
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-primary" />
+                        <h3 className="font-medium">Thông tin đăng nhập</h3>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label
+                          htmlFor="password"
+                          className="flex items-center gap-1"
+                        >
+                          Mật khẩu <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={createStaffForm.password}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setCreateStaffForm("password", e.target.value)
+                          }
+                          onBlur={() => validateCreateStaffField("password")}
+                          className={cn(
+                            createStaffFormErrors.password &&
+                              "border-destructive",
+                          )}
+                          disabled={isLoading}
+                          placeholder="Nhập mật khẩu cho nhân viên"
+                        />
+                        <div className="min-h-[20px]">
+                          {createStaffFormErrors.password && (
+                            <p className="text-sm text-destructive">
+                              {createStaffFormErrors.password}
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Mật khẩu phải có ít nhất 6 ký tự.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border shadow-sm">
                     <CardContent className="px-4 space-y-4">
                       <div className="flex items-center gap-2">
                         <ImagePlus className="h-5 w-5 text-primary" />

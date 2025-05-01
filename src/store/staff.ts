@@ -40,6 +40,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
     hotelId: "",
     note: "",
     imageError: "",
+    password: "",
   },
   createStaffFormErrors: {
     employeeCode: "",
@@ -51,6 +52,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
     note: "",
     gender: "",
     birthday: "",
+    password: "",
   },
 
   // Form cập nhật
@@ -73,6 +75,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
     note: "",
     gender: "",
     birthday: "",
+    password: "",
   },
 
   // API functions
@@ -108,7 +111,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         isFetching: false,
         lastFetchTimestamp: new Map(get().lastFetchTimestamp).set(
           hotelId,
-          Date.now()
+          Date.now(),
         ),
       });
 
@@ -215,6 +218,13 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
           error = "Khách sạn không hợp lệ";
         }
         break;
+      case "password":
+        if (!createStaffForm.password.trim()) {
+          error = "Vui lòng nhập mật khẩu";
+        } else if (createStaffForm.password.length < 6) {
+          error = "Mật khẩu phải có ít nhất 6 ký tự";
+        }
+        break;
       default:
         break;
     }
@@ -236,6 +246,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "email",
       "role",
       "hotelId",
+      "password",
     ];
     let isValid = true;
 
@@ -259,6 +270,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         hotelId: "",
         note: "",
         imageError: "",
+        password: "",
       },
       createStaffFormErrors: {
         employeeCode: "",
@@ -270,6 +282,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         note: "",
         gender: "",
         birthday: "",
+        password: "",
       },
     });
   },
@@ -298,8 +311,8 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       formData.append("hotelId", createStaffForm.hotelId);
       formData.append("gender", createStaffForm.gender || Gender.MALE);
 
-      // Thêm password mới cho tài khoản (mặc định để phù hợp với API)
-      formData.append("password", "Password123@");
+      // Thêm password từ form thay vì sử dụng giá trị cố định
+      formData.append("password", createStaffForm.password);
 
       // Thêm ngày sinh nếu có
       if (createStaffForm.birthday) {
@@ -344,7 +357,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       // Refresh danh sách nhân viên
       console.log(
         "Refreshing staff list with hotelId:",
-        createStaffForm.hotelId
+        createStaffForm.hotelId,
       );
       if (createStaffForm.hotelId) {
         await get().fetchStaff(createStaffForm.hotelId);
@@ -473,6 +486,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         note: "",
         gender: "",
         birthday: "",
+        password: "",
       },
     });
   },
@@ -497,7 +511,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "updateStaff called with staffId:",
       staffId,
       "hotelId:",
-      hotelId
+      hotelId,
     );
 
     if (!get().validateAllUpdateStaffFields()) {
@@ -558,7 +572,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       // Lấy dữ liệu nhân viên sau khi cập nhật
@@ -607,7 +621,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "deleteStaff called with staffId:",
       staffId,
       "hotelId:",
-      hotelId
+      hotelId,
     );
 
     set({ isLoading: true, error: null, success: null });

@@ -8,3 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatNumberWithCommas(number: number): string {
   return new Intl.NumberFormat("vi-VN").format(number);
 }
+
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("vi-VN").format(value);
+}

@@ -42,6 +42,7 @@ export interface CreateStaffForm {
   birthday?: string;
   image?: File | null;
   imageError?: string;
+  password: string;
 }
 
 export interface UpdateStaffForm {
@@ -68,6 +69,7 @@ export interface StaffFormErrors {
   note: string;
   gender: string;
   birthday: string;
+  password: string;
 }
 
 export interface StaffStore {
@@ -92,7 +94,7 @@ export interface StaffStore {
   // Form management functions - Tạo mới
   setCreateStaffForm: (
     field: keyof CreateStaffForm,
-    value: string | File | null
+    value: string | File | null,
   ) => void;
   validateCreateStaffField: (field: keyof CreateStaffForm) => boolean;
   validateAllCreateStaffFields: () => boolean;
@@ -102,7 +104,7 @@ export interface StaffStore {
   // Form management functions - Cập nhật
   setUpdateStaffForm: (
     field: keyof UpdateStaffForm,
-    value: string | File | null
+    value: string | File | null,
   ) => void;
   validateUpdateStaffField: (field: keyof UpdateStaffForm) => boolean;
   validateAllUpdateStaffFields: () => boolean;
