@@ -33,29 +33,17 @@ import {
 import { useInventoryStore } from "@/store";
 import { useInventoryCheckStore } from "@/store/inventory-check";
 import { toast } from "sonner";
-import { InventoryItem } from "@/types/inventory";
+import {
+  InventoryItem,
+  InventoryCheckItem,
+  CreateInventoryCheckData,
+} from "@/types/inventory";
 import { useDebounce } from "@/hooks/use-debounce";
 
 interface CreateInventoryCheckDialogProps {
   hotelId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface InventoryCheckFormItem {
-  inventoryItemId: string;
-  inventoryCode: string;
-  name: string;
-  unit: string;
-  systemStock: number;
-  actualStock: number;
-  difference: number;
-}
-
-interface CreateInventoryCheckData {
-  hotelId: string;
-  note?: string;
-  items: InventoryCheckFormItem[];
 }
 
 export function CreateInventoryCheckDialog({
@@ -70,9 +58,7 @@ export function CreateInventoryCheckDialog({
   // Form states
   const [searchTerm, setSearchTerm] = useState("");
   const [note, setNote] = useState("");
-  const [selectedItems, setSelectedItems] = useState<InventoryCheckFormItem[]>(
-    []
-  );
+  const [selectedItems, setSelectedItems] = useState<InventoryCheckItem[]>([]);
   const [editedItems, setEditedItems] = useState<Record<string, number>>({});
 
   // Sử dụng debounce để tránh gọi API quá nhiều lần
@@ -112,7 +98,7 @@ export function CreateInventoryCheckDialog({
     }
 
     // Thêm sản phẩm vào danh sách
-    const newItem: InventoryCheckFormItem = {
+    const newItem: InventoryCheckItem = {
       inventoryItemId: item._id,
       inventoryCode: item.inventoryCode,
       name: item.name,

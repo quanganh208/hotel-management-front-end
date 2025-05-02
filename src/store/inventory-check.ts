@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
-import { InventoryCheck } from "@/types/inventory";
+import { InventoryCheck, CreateInventoryCheckData } from "@/types/inventory";
 
 interface InventoryCheckState {
   // Dữ liệu
@@ -18,8 +18,11 @@ interface InventoryCheckState {
   // Actions
   fetchInventoryChecks: (hotelId: string) => Promise<void>;
   fetchInventoryCheckById: (id: string) => Promise<void>;
-  createInventoryCheck: (data: any) => Promise<boolean>;
-  updateInventoryCheck: (id: string, data: any) => Promise<boolean>;
+  createInventoryCheck: (data: CreateInventoryCheckData) => Promise<boolean>;
+  updateInventoryCheck: (
+    id: string,
+    data: Partial<InventoryCheck>
+  ) => Promise<boolean>;
   deleteInventoryCheck: (id: string) => Promise<boolean>;
   balanceInventoryCheck: (id: string) => Promise<boolean>;
   clearInventoryChecks: () => void;
@@ -45,7 +48,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
           `/inventory-checks`,
           {
             params: { hotelId },
-          },
+          }
         );
 
         set({
@@ -71,7 +74,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
         set({ isLoading: true, error: null });
 
         const response = await axiosInstance.get<InventoryCheck>(
-          `/inventory-checks/${id}`,
+          `/inventory-checks/${id}`
         );
 
         // The API returns the inventory check directly, not nested in a data property
@@ -92,7 +95,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
       }
     },
 
-    createInventoryCheck: async (data: any) => {
+    createInventoryCheck: async (data: CreateInventoryCheckData) => {
       try {
         set({ isLoading: true, error: null, success: null });
 
@@ -125,7 +128,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
       }
     },
 
-    updateInventoryCheck: async (id: string, data: any) => {
+    updateInventoryCheck: async (id: string, data: Partial<InventoryCheck>) => {
       try {
         set({ isLoading: true, error: null, success: null });
 
@@ -135,7 +138,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
           data,
           {
             headers: { "Content-Type": "application/json" },
-          },
+          }
         );
 
         // Cập nhật lại phiếu kiểm kho được chọn
@@ -212,7 +215,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
 
         // Gọi API để cân bằng phiếu kiểm kho
         const response = await axiosInstance.post(
-          `/inventory-checks/${id}/balance`,
+          `/inventory-checks/${id}/balance`
         );
 
         // Cập nhật lại phiếu kiểm kho đã được cân bằng
@@ -253,5 +256,5 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
         success: null,
       });
     },
-  }),
+  })
 );

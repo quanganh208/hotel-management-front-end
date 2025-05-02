@@ -44,7 +44,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { InventoryCheckStatus } from "@/types/inventory";
+import { InventoryCheckStatus, InventoryCheck } from "@/types/inventory";
 import { useInventoryCheckStore } from "@/store/inventory-check";
 import { toast } from "sonner";
 
@@ -167,14 +167,11 @@ export function InventoryCheckDetailDialog({
 
     setIsSaving(true);
     try {
-      // Prepare update data
-      const updateData = {
+      // Prepare update data according to Partial<InventoryCheck> type
+      const updateData: Partial<InventoryCheck> = {
         hotelId: selectedCheck.hotelId,
         note: editedNote,
-        items: editedItems.map((item) => ({
-          inventoryItemId: item.inventoryItemId,
-          actualStock: item.actualStock,
-        })),
+        items: editedItems,
       };
 
       // Call API to update the inventory check
