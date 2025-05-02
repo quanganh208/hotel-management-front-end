@@ -30,3 +30,6 @@ export interface InventoryResponse {
   categoryCount: number;
   items: InventoryItem[];
 }
+
+// Export các types từ inventory-check.ts
+export * from "./inventory-check";

@@ -333,7 +333,7 @@ export function ProductDetailDialog({
                   {isEditing ? (
                     "Cập nhật thông tin hàng hóa trong form bên dưới"
                   ) : (
-                    <div className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5">
                       <span className="font-medium text-primary">
                         {product.inventoryCode}
                       </span>
@@ -342,7 +342,7 @@ export function ProductDetailDialog({
                           {getItemTypeLabel(product.itemType)}
                         </Badge>
                       )}
-                    </div>
+                    </span>
                   )}
                 </DialogDescription>
               </div>

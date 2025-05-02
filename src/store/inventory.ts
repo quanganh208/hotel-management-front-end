@@ -6,6 +6,7 @@ import { toast } from "sonner";
 interface InventoryState {
   // Dữ liệu
   items: InventoryItem[];
+  searchResults: InventoryItem[];
   stats: {
     totalItems: number;
     totalValue: number;
@@ -15,10 +16,12 @@ interface InventoryState {
 
   // Trạng thái
   isLoading: boolean;
+  isSearching: boolean;
   error: string | null;
 
   // Actions
   fetchInventory: (hotelId: string) => Promise<void>;
+  searchInventory: (hotelId: string, query: string) => Promise<void>;
   createInventory: (formData: FormData) => Promise<void>;
   updateInventory: (id: string, formData: FormData) => Promise<void>;
   deleteInventory: (id: string, hotelId: string) => Promise<void>;
@@ -28,6 +31,7 @@ interface InventoryState {
 export const useInventoryStore = create<InventoryState>((set, get) => ({
   // State mặc định
   items: [],
+  searchResults: [],
   stats: {
     totalItems: 0,
     totalValue: 0,
@@ -35,6 +39,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     categoryCount: 0,
   },
   isLoading: false,
+  isSearching: false,
   error: null,
 
   // Actions
@@ -68,6 +73,39 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
         error:
           error instanceof Error ? error.message : "Failed to fetch inventory",
         isLoading: false,
+      });
+    }
+  },
+
+  searchInventory: async (hotelId: string, query: string) => {
+    try {
+      set({ isSearching: true, error: null });
+
+      // Gọi API tìm kiếm hàng hoá
+      const response = await axiosInstance.get<InventoryItem[]>(
+        `/inventory/search`,
+        {
+          params: { hotelId, query },
+        },
+      );
+
+      // Hiển thị dữ liệu tìm kiếm trong console để debug
+      console.log("Search API response:", response.data);
+
+      // Cập nhật kết quả tìm kiếm
+      set({
+        searchResults: response.data,
+        isSearching: false,
+      });
+    } catch (error) {
+      console.error("Error searching inventory:", error);
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Không thể tìm kiếm hàng hoá",
+        isSearching: false,
+        searchResults: [],
       });
     }
   },
@@ -160,6 +198,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   clearInventory: () => {
     set({
       items: [],
+      searchResults: [],
       stats: {
         totalItems: 0,
         totalValue: 0,
