@@ -6,6 +6,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     accessToken: string;
+    role?: string;
   }
 
   interface Session {
@@ -16,6 +17,7 @@ declare module "next-auth" {
       image?: string | null;
       accessToken: string;
       provider?: string;
+      role?: string;
     } & DefaultSession["user"];
   }
 
@@ -32,6 +34,7 @@ declare module "next-auth/jwt" {
     accessToken: string;
     provider?: string;
     picture?: string;
+    role?: string;
   }
 }
 
@@ -41,6 +44,7 @@ export interface LoginResponse {
   email: string;
   access_token: string;
   image?: string;
+  role?: string;
 }
 
 export interface ApiError {

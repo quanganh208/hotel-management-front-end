@@ -100,10 +100,10 @@ export interface RoomCategoryStore {
   // Form management functions - Tạo mới
   setCreateRoomCategoryForm: (
     field: keyof CreateRoomCategoryForm,
-    value: string | number | File | null,
+    value: string | number | File | null
   ) => void;
   validateCreateRoomCategoryField: (
-    field: keyof CreateRoomCategoryForm,
+    field: keyof CreateRoomCategoryForm
   ) => boolean;
   validateAllCreateRoomCategoryFields: () => boolean;
   resetCreateRoomCategoryForm: () => void;
@@ -112,10 +112,10 @@ export interface RoomCategoryStore {
   // Form management functions - Cập nhật
   setUpdateRoomCategoryForm: (
     field: keyof UpdateRoomCategoryForm,
-    value: string | number | File | null,
+    value: string | number | File | null
   ) => void;
   validateUpdateRoomCategoryField: (
-    field: keyof UpdateRoomCategoryForm,
+    field: keyof UpdateRoomCategoryForm
   ) => boolean;
   validateAllUpdateRoomCategoryFields: () => boolean;
   resetUpdateRoomCategoryForm: () => void;
@@ -130,6 +130,30 @@ export interface RoomCategoryStore {
   getRoomsByCategory: (categoryId: string) => Room[];
 }
 
+// Định nghĩa interface cho dữ liệu booking mới
+export interface BookingDetail {
+  _id: string;
+  roomId: {
+    _id: string;
+    roomNumber: string;
+    floor: string;
+  };
+  checkInDate: string;
+  checkOutDate: string;
+  guestName: string;
+  phoneNumber: string;
+  guestCount: number;
+  note: string;
+  createdBy: {
+    _id: string;
+    email: string;
+    name: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Interface cũ vẫn giữ lại để tương thích với code hiện tại
 export interface Booking {
   _id: string;
   roomId: string;
@@ -140,6 +164,34 @@ export interface Booking {
   totalPrice: number;
   createdAt: string;
   updatedAt: string;
+}
+
+// Định nghĩa type cho dữ liệu cập nhật booking
+export interface UpdateBookingData {
+  checkInDate?: string;
+  checkOutDate?: string;
+  guestName?: string;
+  phoneNumber?: string;
+  guestCount?: number;
+  note?: string;
+}
+
+// Định nghĩa type cho dữ liệu khách vãng lai (walk-in)
+export interface GuestWalkInData {
+  guestName: string;
+  phoneNumber: string;
+  guestCount: number;
+  checkInDate?: string;
+  checkOutDate?: string;
+  note?: string;
+}
+
+// Định nghĩa type cho kết quả của thao tác check-in
+export interface CheckInResult {
+  success: boolean;
+  message: string;
+  room: Room;
+  booking: BookingDetail;
 }
 
 export interface RoomWithType {
@@ -206,7 +258,7 @@ export interface RoomStore {
   // Form management functions - Tạo mới
   setCreateRoomForm: (
     field: keyof CreateRoomForm,
-    value: string | File | null,
+    value: string | File | null
   ) => void;
   validateCreateRoomField: (field: keyof CreateRoomForm) => boolean;
   validateAllCreateRoomFields: () => boolean;
@@ -216,7 +268,7 @@ export interface RoomStore {
   // Form management functions - Cập nhật
   setUpdateRoomForm: (
     field: keyof UpdateRoomForm,
-    value: string | File | null,
+    value: string | File | null
   ) => void;
   validateUpdateRoomField: (field: keyof UpdateRoomForm) => boolean;
   validateAllUpdateRoomFields: () => boolean;

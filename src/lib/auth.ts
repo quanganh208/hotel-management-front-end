@@ -20,7 +20,7 @@ export const authOptions: AuthOptions = {
         try {
           const response = await authService.login(
             credentials.email,
-            credentials.password,
+            credentials.password
           );
 
           if (response && response.access_token) {
@@ -29,6 +29,7 @@ export const authOptions: AuthOptions = {
               name: response.name,
               email: response.email,
               accessToken: response.access_token,
+              role: response.role,
               image:
                 response.image ||
                 `/api/avatar?name=${encodeURIComponent(response.name)}`,
@@ -41,7 +42,7 @@ export const authOptions: AuthOptions = {
           // Xử lý lỗi kết nối
           if (error.code === "ECONNREFUSED") {
             throw new Error(
-              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
+              "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
             );
           }
 
@@ -103,6 +104,7 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         token.accessToken = user.accessToken;
+        token.role = user.role;
 
         // Nếu user.image có sẵn từ credentials, lưu vào token
         if (user.image) {
@@ -127,6 +129,7 @@ export const authOptions: AuthOptions = {
       if (token && session.user) {
         session.user.id = token.id;
         session.user.accessToken = token.accessToken;
+        session.user.role = token.role;
 
         // Đảm bảo image được truyền từ token sang session
         if (token.picture) {
@@ -162,7 +165,7 @@ export const authService = {
 
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/login",
-        data,
+        data
       );
 
       return response.data;
@@ -176,7 +179,7 @@ export const authService = {
     try {
       const response = await axiosInstance.post<LoginResponse>(
         "/auth/google-auth",
-        { idToken },
+        { idToken }
       );
 
       return response.data;
@@ -184,7 +187,7 @@ export const authService = {
     } catch (error: any) {
       if (error.code === "ECONNREFUSED") {
         throw new Error(
-          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau.",
+          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet hoặc thử lại sau."
         );
       }
 
@@ -196,7 +199,7 @@ export const authService = {
 
       // Lỗi mặc định
       throw new Error(
-        "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
+        "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
       );
     }
   },

@@ -342,7 +342,7 @@ export function StaffDetailDialog({
                           }
                           className={cn(
                             updateStaffFormErrors.employeeCode &&
-                              "border-destructive",
+                              "border-destructive"
                           )}
                           disabled={isLoading}
                         />
@@ -365,7 +365,7 @@ export function StaffDetailDialog({
                           }
                           onBlur={() => validateUpdateStaffField("name")}
                           className={cn(
-                            updateStaffFormErrors.name && "border-destructive",
+                            updateStaffFormErrors.name && "border-destructive"
                           )}
                           disabled={isLoading}
                         />
@@ -390,7 +390,7 @@ export function StaffDetailDialog({
                           onBlur={() => validateUpdateStaffField("phoneNumber")}
                           className={cn(
                             updateStaffFormErrors.phoneNumber &&
-                              "border-destructive",
+                              "border-destructive"
                           )}
                           disabled={isLoading}
                         />
@@ -414,7 +414,7 @@ export function StaffDetailDialog({
                           }
                           onBlur={() => validateUpdateStaffField("email")}
                           className={cn(
-                            updateStaffFormErrors.email && "border-destructive",
+                            updateStaffFormErrors.email && "border-destructive"
                           )}
                           disabled={isLoading}
                         />
@@ -439,8 +439,7 @@ export function StaffDetailDialog({
                           <SelectTrigger
                             id="role"
                             className={cn(
-                              updateStaffFormErrors.role &&
-                                "border-destructive",
+                              updateStaffFormErrors.role && "border-destructive"
                             )}
                           >
                             <SelectValue placeholder="Chọn chức vụ" />
@@ -463,6 +462,37 @@ export function StaffDetailDialog({
                           {updateStaffFormErrors.role && (
                             <p className="text-sm text-destructive">
                               {updateStaffFormErrors.role}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="password">
+                          Mật khẩu mới
+                          <span className="text-xs text-muted-foreground">
+                            (để trống nếu không thay đổi)
+                          </span>
+                        </Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={updateStaffForm.password || ""}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setUpdateStaffForm("password", e.target.value)
+                          }
+                          onBlur={() => validateUpdateStaffField("password")}
+                          className={cn(
+                            updateStaffFormErrors.password &&
+                              "border-destructive"
+                          )}
+                          disabled={isLoading}
+                          placeholder="Nhập mật khẩu mới"
+                        />
+                        <div className="min-h-[20px]">
+                          {updateStaffFormErrors.password && (
+                            <p className="text-sm text-destructive">
+                              {updateStaffFormErrors.password}
                             </p>
                           )}
                         </div>

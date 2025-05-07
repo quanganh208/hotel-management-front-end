@@ -64,6 +64,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
     role: StaffRole.MANAGER,
     note: "",
     imageError: "",
+    password: "",
   },
   updateStaffFormErrors: {
     employeeCode: "",
@@ -111,7 +112,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         isFetching: false,
         lastFetchTimestamp: new Map(get().lastFetchTimestamp).set(
           hotelId,
-          Date.now(),
+          Date.now()
         ),
       });
 
@@ -357,7 +358,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       // Refresh danh sách nhân viên
       console.log(
         "Refreshing staff list with hotelId:",
-        createStaffForm.hotelId,
+        createStaffForm.hotelId
       );
       if (createStaffForm.hotelId) {
         await get().fetchStaff(createStaffForm.hotelId);
@@ -432,6 +433,17 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
           error = "Vui lòng chọn chức vụ";
         }
         break;
+      case "password":
+        // Only validate password if it's provided
+        if (
+          updateStaffForm.password &&
+          updateStaffForm.password.trim() !== ""
+        ) {
+          if (updateStaffForm.password.length < 6) {
+            error = "Mật khẩu phải có ít nhất 6 ký tự";
+          }
+        }
+        break;
       default:
         break;
     }
@@ -475,6 +487,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         role: StaffRole.MANAGER,
         note: "",
         imageError: "",
+        password: "",
       },
       updateStaffFormErrors: {
         employeeCode: "",
@@ -511,7 +524,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "updateStaff called with staffId:",
       staffId,
       "hotelId:",
-      hotelId,
+      hotelId
     );
 
     if (!get().validateAllUpdateStaffFields()) {
@@ -553,6 +566,11 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         formData.append("gender", updateStaffForm.gender);
       }
 
+      // Thêm mật khẩu mới nếu được cung cấp
+      if (updateStaffForm.password && updateStaffForm.password.trim() !== "") {
+        formData.append("password", updateStaffForm.password);
+      }
+
       // Thêm ảnh nếu có
       if (updateStaffForm.image) {
         formData.append("image", updateStaffForm.image);
@@ -572,7 +590,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
 
       // Lấy dữ liệu nhân viên sau khi cập nhật
@@ -621,7 +639,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "deleteStaff called with staffId:",
       staffId,
       "hotelId:",
-      hotelId,
+      hotelId
     );
 
     set({ isLoading: true, error: null, success: null });
