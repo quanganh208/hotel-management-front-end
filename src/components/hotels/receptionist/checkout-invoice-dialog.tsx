@@ -218,8 +218,12 @@ export function CheckoutInvoiceDialog({
   const generatePaymentQR = async () => {
     if (!invoice) return;
 
-    // Nếu đã có QR code data cho invoice hiện tại, chỉ mở dialog
-    if (qrCodeData && qrCodeData.invoiceId === invoice._id) {
+    // Nếu đã có QR code data cho invoice hiện tại và số tiền không thay đổi, chỉ mở dialog
+    if (
+      qrCodeData &&
+      qrCodeData.invoiceId === invoice._id &&
+      qrCodeData.amount === finalAmount
+    ) {
       setShowQrDialog(true);
       return;
     }
@@ -313,6 +317,16 @@ export function CheckoutInvoiceDialog({
 
       toast.success("Cập nhật hóa đơn thành công");
       setIsEditMode(false);
+
+      // Reset QR code data sau khi cập nhật hóa đơn thành công
+      setQrCodeData(null);
+      setPaymentStatus(null);
+
+      // Xóa interval nếu có
+      if (paymentCheckIntervalRef.current) {
+        clearInterval(paymentCheckIntervalRef.current);
+        paymentCheckIntervalRef.current = null;
+      }
 
       // Gọi callback để cập nhật dữ liệu
       if (onSuccess) {
@@ -540,6 +554,8 @@ export function CheckoutInvoiceDialog({
                     setPaymentMethod(value as "CASH" | "TRANSFER");
                     confirmedTransactionRef.current = null;
                     setPaymentStatus(null);
+                    // Xóa qrCodeData khi đổi phương thức thanh toán
+                    setQrCodeData(null);
                     if (paymentCheckIntervalRef.current) {
                       clearInterval(paymentCheckIntervalRef.current);
                       paymentCheckIntervalRef.current = null;
@@ -701,7 +717,7 @@ export function CheckoutInvoiceDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Dialog hiển thị QR code thanh toán */}
+      {/* QR Code Dialog */}
       <Dialog
         open={showQrDialog}
         onOpenChange={(open) => {
@@ -713,15 +729,22 @@ export function CheckoutInvoiceDialog({
           setShowQrDialog(open);
         }}
       >
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center">
-              QR Code Thanh Toán
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              {paymentStatus?.paid
-                ? "Thanh toán đã được xác nhận!"
-                : "Quét mã để thanh toán. Hệ thống sẽ tự động kiểm tra mỗi 10 giây."}
+            <DialogTitle>Mã QR thanh toán</DialogTitle>
+            <DialogDescription>
+              {paymentStatus?.paid ? (
+                "Thanh toán đã được xác nhận!"
+              ) : (
+                <>
+                  Quét mã để thanh toán số tiền{" "}
+                  <span className="font-medium">
+                    {formatCurrency(qrCodeData?.amount || 0)} đ
+                  </span>{" "}
+                  qua chuyển khoản ngân hàng. Hệ thống sẽ tự động kiểm tra mỗi
+                  10 giây.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4">
