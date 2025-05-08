@@ -26,6 +26,11 @@ declare module "next-auth" {
     picture?: string;
     sub?: string;
   }
+
+  // Bổ sung thuộc tính cho Account để lưu ID hệ thống
+  interface Account {
+    userId?: string;
+  }
 }
 
 declare module "next-auth/jwt" {

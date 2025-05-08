@@ -119,6 +119,8 @@ export const authOptions: AuthOptions = {
 
           if (response.access_token) {
             account.access_token = response.access_token;
+            // Lưu ID hệ thống vào account để sử dụng trong callback jwt
+            account.userId = response._id;
             return true;
           }
 
@@ -151,13 +153,18 @@ export const authOptions: AuthOptions = {
         }
       }
 
-      // Nếu là đăng nhập Google, lưu thông tin từ Google
+      // Nếu là đăng nhập Google, lưu thông tin từ API hệ thống
       if (account && account.provider === "google") {
         token.provider = account.provider;
 
         // Lưu access_token từ API (nếu có)
         if (account.access_token) {
           token.accessToken = account.access_token;
+        }
+
+        // Sử dụng ID từ hệ thống thay vì ID Google
+        if (account.userId) {
+          token.id = account.userId;
         }
       }
 

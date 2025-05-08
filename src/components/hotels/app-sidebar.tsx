@@ -9,6 +9,7 @@ import {
   Home,
   Package,
   Users,
+  MessageSquareText,
 } from "lucide-react";
 
 import {
@@ -100,6 +101,21 @@ const data = {
         {
           title: "Doanh thu",
           url: "/hotels/[id]/reports/revenue",
+        },
+      ],
+    },
+    {
+      title: "Chatbot AI",
+      url: "/hotels/[id]/chatbot",
+      icon: MessageSquareText,
+      items: [
+        {
+          title: "Thử nghiệm",
+          url: "/hotels/[id]/chatbot/playground",
+        },
+        {
+          title: "Lịch sử đoạn chat",
+          url: "/hotels/[id]/chatbot/history",
         },
       ],
     },
