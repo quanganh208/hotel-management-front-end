@@ -175,6 +175,7 @@ function PasswordSection() {
       });
       setPasswordStrength(0);
       setPasswordFeedback("");
+      //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // Xử lý các lỗi cụ thể từ API
       if (error.response) {
@@ -337,7 +338,7 @@ function PasswordSection() {
                     </div>
                     <div className="flex items-center gap-1">
                       {/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
-                        formData.newPassword
+                        formData.newPassword,
                       ) ? (
                         <CheckCircle2 className="h-3 w-3 text-green-500" />
                       ) : (
@@ -535,6 +536,7 @@ function TwoFactorSection() {
         setIs2FAEnabled(true);
         toast.success("Xác thực 2 yếu tố đã được bật");
       }
+      //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
@@ -779,7 +781,7 @@ function TwoFactorSection() {
                                 className="h-6 w-6"
                                 onClick={() => {
                                   navigator.clipboard.writeText(
-                                    otpAuthUrl.split("secret=")[1]
+                                    otpAuthUrl.split("secret=")[1],
                                   );
                                   toast.success("Đã sao chép mã bí mật");
                                 }}

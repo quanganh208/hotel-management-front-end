@@ -394,7 +394,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         isFetching: false,
         lastFetchTimestamp: new Map(get().lastFetchTimestamp).set(
           hotelId,
-          Date.now()
+          Date.now(),
         ),
       });
 

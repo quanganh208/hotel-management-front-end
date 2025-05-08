@@ -11,7 +11,7 @@ import {
  * @param bookingId ID của booking cần lấy thông tin
  */
 export const getBookingById = async (
-  bookingId: string
+  bookingId: string,
 ): Promise<BookingDetail> => {
   const response = await axios.get(`/bookings/${bookingId}`);
   return response.data;
@@ -22,7 +22,7 @@ export const getBookingById = async (
  * @param roomId ID của phòng cần lấy danh sách bookings
  */
 export const getBookingsByRoomId = async (
-  roomId: string
+  roomId: string,
 ): Promise<BookingDetail[]> => {
   const response = await axios.get(`/bookings/room/${roomId}`);
   return response.data;
@@ -33,7 +33,7 @@ export const getBookingsByRoomId = async (
  * @param roomId ID của phòng cần lấy booking mới nhất
  */
 export const getLatestBookingByRoomId = async (
-  roomId: string
+  roomId: string,
 ): Promise<BookingDetail | null> => {
   try {
     const response = await axios.get(`/bookings/room/${roomId}/latest`);
@@ -51,7 +51,7 @@ export const getLatestBookingByRoomId = async (
  */
 export const updateBooking = async (
   bookingId: string,
-  bookingData: UpdateBookingData
+  bookingData: UpdateBookingData,
 ): Promise<BookingDetail> => {
   const response = await axios.patch(`/bookings/${bookingId}`, bookingData);
   return response.data;
@@ -66,7 +66,7 @@ export const updateBooking = async (
 export const checkInRoom = async (
   roomId: string,
   bookingId: string,
-  note?: string
+  note?: string,
 ): Promise<CheckInResult> => {
   const response = await axios.patch(`/rooms/${roomId}/check-in`, {
     bookingId,
@@ -82,7 +82,7 @@ export const checkInRoom = async (
  */
 export const directCheckInRoom = async (
   roomId: string,
-  guestData: GuestWalkInData
+  guestData: GuestWalkInData,
 ): Promise<CheckInResult> => {
   // Thêm ngày check-in/check-out mặc định nếu không được cung cấp
   const now = new Date();

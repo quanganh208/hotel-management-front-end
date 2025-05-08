@@ -29,7 +29,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { checkInRoom } from "@/lib/booking-service";
 
 interface SearchBookingDialogProps {
@@ -64,23 +64,6 @@ interface Booking {
   createdBy: User;
   createdAt: string;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "pending":
-      return "bg-yellow-500 hover:bg-yellow-600";
-    case "confirmed":
-      return "bg-blue-500 hover:bg-blue-600";
-    case "checked_in":
-      return "bg-green-500 hover:bg-green-600";
-    case "checked_out":
-      return "bg-gray-500 hover:bg-gray-600";
-    case "cancelled":
-      return "bg-red-500 hover:bg-red-600";
-    default:
-      return "bg-blue-500 hover:bg-blue-600";
-  }
-};
 
 const getStatusBadge = (status: string) => {
   switch (status.toLowerCase()) {
@@ -154,6 +137,7 @@ export function SearchBookingDialog({
       });
       setBookings(data);
     } catch (error) {
+      console.error("Lỗi khi tìm kiếm đặt phòng:", error);
       toast.error("Có lỗi xảy ra khi tìm kiếm");
     } finally {
       setIsLoading(false);
@@ -170,8 +154,8 @@ export function SearchBookingDialog({
       // Cập nhật trạng thái booking trong danh sách
       setBookings(
         bookings.map((item) =>
-          item._id === booking._id ? { ...item, status: "checked_in" } : item
-        )
+          item._id === booking._id ? { ...item, status: "checked_in" } : item,
+        ),
       );
 
       // Gọi callback để refresh danh sách phòng
@@ -179,6 +163,7 @@ export function SearchBookingDialog({
         onCheckInSuccess();
       }
     } catch (error) {
+      console.error("Lỗi khi nhận phòng:", error);
       toast.error("Có lỗi xảy ra khi nhận phòng");
     } finally {
       setCheckingIn(null);

@@ -2,7 +2,6 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  BadgeCheck,
   Bell,
   Building2,
   CreditCard,

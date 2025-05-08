@@ -42,7 +42,7 @@ export function BookingDialog({
 
   // Lọc chỉ phòng trống
   const availableRooms = rooms.filter(
-    (room) => room.status === RoomStatus.AVAILABLE
+    (room) => room.status === RoomStatus.AVAILABLE,
   );
 
   // Hàm xử lý khi submit form
@@ -70,7 +70,7 @@ export function BookingDialog({
   // Hàm xử lý khi thay đổi giá trị input
   const handleInputChange = (
     field: keyof typeof bookingForm,
-    value: string | number
+    value: string | number,
   ) => {
     setBookingForm(field, value);
   };
@@ -99,7 +99,7 @@ export function BookingDialog({
                       "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
                       bookingForm.roomId === room._id
                         ? "border-primary bg-primary/5 ring-2 ring-primary"
-                        : "border-muted bg-background hover:bg-muted/40"
+                        : "border-muted bg-background hover:bg-muted/40",
                     )}
                   >
                     <input

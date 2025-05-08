@@ -21,7 +21,7 @@ interface InventoryCheckState {
   createInventoryCheck: (data: CreateInventoryCheckData) => Promise<boolean>;
   updateInventoryCheck: (
     id: string,
-    data: Partial<InventoryCheck>
+    data: Partial<InventoryCheck>,
   ) => Promise<boolean>;
   deleteInventoryCheck: (id: string) => Promise<boolean>;
   balanceInventoryCheck: (id: string) => Promise<boolean>;
@@ -48,7 +48,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
           `/inventory-checks`,
           {
             params: { hotelId },
-          }
+          },
         );
 
         set({
@@ -74,7 +74,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
         set({ isLoading: true, error: null });
 
         const response = await axiosInstance.get<InventoryCheck>(
-          `/inventory-checks/${id}`
+          `/inventory-checks/${id}`,
         );
 
         // The API returns the inventory check directly, not nested in a data property
@@ -138,7 +138,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
           data,
           {
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
 
         // Cập nhật lại phiếu kiểm kho được chọn
@@ -215,7 +215,7 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
 
         // Gọi API để cân bằng phiếu kiểm kho
         const response = await axiosInstance.post(
-          `/inventory-checks/${id}/balance`
+          `/inventory-checks/${id}/balance`,
         );
 
         // Cập nhật lại phiếu kiểm kho đã được cân bằng
@@ -256,5 +256,5 @@ export const useInventoryCheckStore = create<InventoryCheckState>(
         success: null,
       });
     },
-  })
+  }),
 );

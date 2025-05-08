@@ -342,7 +342,7 @@ export function StaffDetailDialog({
                           }
                           className={cn(
                             updateStaffFormErrors.employeeCode &&
-                              "border-destructive"
+                              "border-destructive",
                           )}
                           disabled={isLoading}
                         />
@@ -365,7 +365,7 @@ export function StaffDetailDialog({
                           }
                           onBlur={() => validateUpdateStaffField("name")}
                           className={cn(
-                            updateStaffFormErrors.name && "border-destructive"
+                            updateStaffFormErrors.name && "border-destructive",
                           )}
                           disabled={isLoading}
                         />
@@ -390,7 +390,7 @@ export function StaffDetailDialog({
                           onBlur={() => validateUpdateStaffField("phoneNumber")}
                           className={cn(
                             updateStaffFormErrors.phoneNumber &&
-                              "border-destructive"
+                              "border-destructive",
                           )}
                           disabled={isLoading}
                         />
@@ -414,7 +414,7 @@ export function StaffDetailDialog({
                           }
                           onBlur={() => validateUpdateStaffField("email")}
                           className={cn(
-                            updateStaffFormErrors.email && "border-destructive"
+                            updateStaffFormErrors.email && "border-destructive",
                           )}
                           disabled={isLoading}
                         />
@@ -439,7 +439,8 @@ export function StaffDetailDialog({
                           <SelectTrigger
                             id="role"
                             className={cn(
-                              updateStaffFormErrors.role && "border-destructive"
+                              updateStaffFormErrors.role &&
+                                "border-destructive",
                             )}
                           >
                             <SelectValue placeholder="Chọn chức vụ" />
@@ -484,7 +485,7 @@ export function StaffDetailDialog({
                           onBlur={() => validateUpdateStaffField("password")}
                           className={cn(
                             updateStaffFormErrors.password &&
-                              "border-destructive"
+                              "border-destructive",
                           )}
                           disabled={isLoading}
                           placeholder="Nhập mật khẩu mới"

@@ -153,7 +153,7 @@ function AddItemsDialog({
     setCartItems((prev) => {
       // Kiểm tra xem item đã có trong giỏ hàng chưa
       const existingItem = prev.find(
-        (cartItem) => cartItem.itemId === item._id
+        (cartItem) => cartItem.itemId === item._id,
       );
 
       if (existingItem) {
@@ -161,7 +161,7 @@ function AddItemsDialog({
         return prev.map((cartItem) =>
           cartItem.itemId === item._id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
+            : cartItem,
         );
       } else {
         // Nếu chưa có, thêm vào giỏ hàng
@@ -185,8 +185,8 @@ function AddItemsDialog({
 
     setCartItems((prev) =>
       prev.map((item) =>
-        item.itemId === itemId ? { ...item, quantity: newQuantity } : item
-      )
+        item.itemId === itemId ? { ...item, quantity: newQuantity } : item,
+      ),
     );
   };
 
@@ -198,7 +198,7 @@ function AddItemsDialog({
   // Tính tổng tiền giỏ hàng
   const totalAmount = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
-    0
+    0,
   );
 
   // Lưu danh sách hàng hoá
@@ -574,7 +574,7 @@ export function RoomDetailDialog({
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<RoomWithType | null>(null);
   const [latestBooking, setLatestBooking] = useState<BookingDetail | null>(
-    null
+    null,
   );
   const [currentInvoice, setCurrentInvoice] = useState<Invoice | null>(null);
   const [isLoadingBooking, setIsLoadingBooking] = useState(false);
@@ -596,7 +596,7 @@ export function RoomDetailDialog({
       checkInDate: "",
       checkOutDate: "",
       note: "",
-    }
+    },
   );
 
   const [formData, setFormData] = useState<EditBookingFormData>({
@@ -668,7 +668,7 @@ export function RoomDetailDialog({
   const fetchCurrentInvoice = async (roomId: string) => {
     try {
       const response = await axiosInstance.get(
-        `/invoices/room/${roomId}/active`
+        `/invoices/room/${roomId}/active`,
       );
       setCurrentInvoice(response.data);
     } catch (error) {
@@ -874,7 +874,7 @@ export function RoomDetailDialog({
 
   // Handle form input change
   function handleInputChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
     setFormData((prev) => ({

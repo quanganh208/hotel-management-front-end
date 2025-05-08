@@ -257,7 +257,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateRegisterField(field)
+          get().validateRegisterField(field),
         );
         return results.every((result) => result === true);
       },
@@ -406,6 +406,7 @@ export const useAuthStore = create<AuthState>()(
           });
           return true;
         } catch (error) {
+          console.error("Lỗi khi đăng nhập:", error);
           set({
             error: API_ERRORS.CONNECTION,
             isLoading: false,
@@ -530,7 +531,7 @@ export const useAuthStore = create<AuthState>()(
       validateAllTwoFactorFields: () => {
         const fields: (keyof TwoFactorForm)[] = ["userId", "code"];
         const results = fields.map((field) =>
-          get().validateTwoFactorField(field)
+          get().validateTwoFactorField(field),
         );
         return results.every((result) => result === true);
       },
@@ -594,6 +595,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
           return false;
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           // Xử lý lỗi từ API
           if (error.response?.data?.message) {
@@ -851,7 +853,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateResetPasswordField(field)
+          get().validateResetPasswordField(field),
         );
         return results.every((result) => result === true);
       },
@@ -989,6 +991,6 @@ export const useAuthStore = create<AuthState>()(
         requiresTwoFactor: state.requiresTwoFactor,
         pendingUserId: state.pendingUserId,
       }),
-    }
-  )
+    },
+  ),
 );

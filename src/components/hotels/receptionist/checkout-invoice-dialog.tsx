@@ -95,7 +95,7 @@ export function CheckoutInvoiceDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "TRANSFER">(
-    "CASH"
+    "CASH",
   );
   const [discount, setDiscount] = useState(invoice?.discount || 0);
   const [note, setNote] = useState("");
@@ -122,7 +122,7 @@ export function CheckoutInvoiceDialog({
   // Tính toán tổng tiền từ items
   const totalItemsAmount = editableItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   // Tính toán lại tổng tiền sau khi áp dụng giảm giá
@@ -209,7 +209,7 @@ export function CheckoutInvoiceDialog({
           return updatedItem;
         }
         return item;
-      })
+      }),
     );
   };
 
@@ -298,7 +298,7 @@ export function CheckoutInvoiceDialog({
       // Chỉ hiển thị thông báo lỗi khi người dùng thực hiện kiểm tra thủ công
       if (!paymentCheckIntervalRef.current) {
         toast.error(
-          "Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại sau."
+          "Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại sau.",
         );
       }
       setPaymentStatus({
@@ -364,7 +364,7 @@ export function CheckoutInvoiceDialog({
     // Không cho phép trả phòng nếu phương thức là chuyển khoản và chưa xác nhận thanh toán
     if (paymentMethod === "TRANSFER" && !paymentStatus?.paid) {
       toast.error(
-        "Vui lòng xác nhận thanh toán chuyển khoản trước khi trả phòng"
+        "Vui lòng xác nhận thanh toán chuyển khoản trước khi trả phòng",
       );
       return;
     }
@@ -475,7 +475,7 @@ export function CheckoutInvoiceDialog({
                                     onClick={() =>
                                       updateItemQuantity(
                                         index,
-                                        item.quantity - 1
+                                        item.quantity - 1,
                                       )
                                     }
                                   >
@@ -491,7 +491,7 @@ export function CheckoutInvoiceDialog({
                                     onClick={() =>
                                       updateItemQuantity(
                                         index,
-                                        item.quantity + 1
+                                        item.quantity + 1,
                                       )
                                     }
                                   >
@@ -684,7 +684,7 @@ export function CheckoutInvoiceDialog({
                   onClick={() => {
                     setIsEditMode(false);
                     setEditableItems(
-                      invoice.items.map((item) => ({ ...item }))
+                      invoice.items.map((item) => ({ ...item })),
                     );
                     setDiscount(invoice.discount);
                   }}

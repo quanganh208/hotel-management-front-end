@@ -112,7 +112,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
         isFetching: false,
         lastFetchTimestamp: new Map(get().lastFetchTimestamp).set(
           hotelId,
-          Date.now()
+          Date.now(),
         ),
       });
 
@@ -358,7 +358,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       // Refresh danh sách nhân viên
       console.log(
         "Refreshing staff list with hotelId:",
-        createStaffForm.hotelId
+        createStaffForm.hotelId,
       );
       if (createStaffForm.hotelId) {
         await get().fetchStaff(createStaffForm.hotelId);
@@ -524,7 +524,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "updateStaff called with staffId:",
       staffId,
       "hotelId:",
-      hotelId
+      hotelId,
     );
 
     if (!get().validateAllUpdateStaffFields()) {
@@ -590,7 +590,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       // Lấy dữ liệu nhân viên sau khi cập nhật
@@ -639,7 +639,7 @@ export const useStaffStore = create<StaffStore>((set, get) => ({
       "deleteStaff called with staffId:",
       staffId,
       "hotelId:",
-      hotelId
+      hotelId,
     );
 
     set({ isLoading: true, error: null, success: null });

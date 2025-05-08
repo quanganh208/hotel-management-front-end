@@ -114,7 +114,7 @@ export function CreateInventoryCheckDialog({
   // Xoá sản phẩm khỏi danh sách
   const removeItemFromCheck = (inventoryItemId: string) => {
     setSelectedItems((prev) =>
-      prev.filter((item) => item.inventoryItemId !== inventoryItemId)
+      prev.filter((item) => item.inventoryItemId !== inventoryItemId),
     );
 
     // Xoá khỏi danh sách chỉnh sửa nếu có
@@ -176,7 +176,7 @@ export function CreateInventoryCheckDialog({
   // Tính tổng chênh lệch
   const totalDifference = selectedItems.reduce(
     (sum, item) => sum + item.difference,
-    0
+    0,
   );
 
   // Tính số lượng lệch tăng
@@ -299,7 +299,7 @@ export function CreateInventoryCheckDialog({
                     ) : (
                       searchResults.map((item) => {
                         const isSelected = selectedItems.some(
-                          (selected) => selected.inventoryItemId === item._id
+                          (selected) => selected.inventoryItemId === item._id,
                         );
                         return (
                           <TableRow
@@ -389,7 +389,7 @@ export function CreateInventoryCheckDialog({
                                   onChange={(e) =>
                                     updateActualStock(
                                       item.inventoryItemId,
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="w-20 h-8 text-right"
@@ -428,7 +428,7 @@ export function CreateInventoryCheckDialog({
                                   onClick={() =>
                                     startEditing(
                                       item.inventoryItemId,
-                                      item.actualStock
+                                      item.actualStock,
                                     )
                                   }
                                 >

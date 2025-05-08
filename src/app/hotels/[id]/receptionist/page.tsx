@@ -3,12 +3,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import { CalendarDays, CreditCard, Search } from "lucide-react";
+import { CalendarDays, Search } from "lucide-react";
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { useRoomStore } from "@/store/rooms";
 import { RoomStatus, RoomWithType } from "@/types/room";
-import { toast } from "sonner";
 import QuickStats from "@/components/hotels/receptionist/QuickStats";
 import RoomSearchAndFilter from "@/components/hotels/receptionist/RoomSearchAndFilter";
 import RoomGrid from "@/components/hotels/receptionist/RoomGrid";
@@ -50,19 +49,19 @@ export default function ReceptionistPage() {
   useEffect(() => {
     const stats = {
       available: hotelRooms.filter(
-        (room) => room.status === RoomStatus.AVAILABLE
+        (room) => room.status === RoomStatus.AVAILABLE,
       ).length,
       occupied: hotelRooms.filter(
         (room) =>
           room.status === RoomStatus.OCCUPIED ||
-          room.status === RoomStatus.CHECKED_IN
+          room.status === RoomStatus.CHECKED_IN,
       ).length,
       cleaning: hotelRooms.filter((room) => room.status === RoomStatus.CLEANING)
         .length,
       maintenance: hotelRooms.filter(
         (room) =>
           room.status === RoomStatus.MAINTENANCE ||
-          room.status === RoomStatus.OUT_OF_SERVICE
+          room.status === RoomStatus.OUT_OF_SERVICE,
       ).length,
     };
     setQuickStats(stats);
@@ -99,12 +98,6 @@ export default function ReceptionistPage() {
   const handleRoomClick = (room: RoomWithType) => {
     setSelectedRoom(room);
     setRoomDetailOpen(true);
-  };
-
-  // Handle create invoice
-  const handleCreateInvoice = () => {
-    toast.info("Tạo hóa đơn bán lẻ");
-    // TODO: Triển khai tạo hóa đơn bán lẻ
   };
 
   // Handle create booking

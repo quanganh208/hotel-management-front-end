@@ -31,7 +31,7 @@ interface CheckInDialogProps {
   checkInNote: string;
   isCheckingIn: boolean;
   onWalkInGuestFormChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   onCheckInNoteChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onConfirm: () => void;

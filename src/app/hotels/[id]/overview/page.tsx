@@ -30,19 +30,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ChartContainer } from "@/components/ui/chart";
 import {
   AreaChart,
-  BarChart,
   PieChart,
   Pie,
   Area,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   Cell,
   ResponsiveContainer,
 } from "recharts";
@@ -51,11 +47,8 @@ import { formatCurrency } from "@/lib/utils";
 import axiosInstance from "@/lib/axios";
 import { useParams } from "next/navigation";
 import {
-  CalendarIcon,
-  CurrencyIcon,
   DollarSignIcon,
   PercentIcon,
-  UsersIcon,
   BarChart3Icon,
   UserIcon,
   PieChartIcon,
@@ -212,13 +205,9 @@ const StatCard = ({
 export default function HotelOverviewPage() {
   const params = useParams();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState({
-    startDate: null as string | null,
-    endDate: null as string | null,
-  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -226,16 +215,7 @@ export default function HotelOverviewPage() {
         setLoading(true);
         const hotelId = params.id as string;
 
-        const queryParams = new URLSearchParams();
-        if (dateRange.startDate) {
-          queryParams.append("startDate", dateRange.startDate);
-        }
-
-        if (dateRange.endDate) {
-          queryParams.append("endDate", dateRange.endDate);
-        }
-
-        const url = `/dashboard/overview/${hotelId}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+        const url = `/dashboard/overview/${hotelId}`;
 
         const { data } = await axiosInstance.get<DashboardData>(url);
         setDashboardData(data);
@@ -247,10 +227,10 @@ export default function HotelOverviewPage() {
     };
 
     fetchDashboardData();
-  }, [dateRange, params.id]);
+  }, [params.id]);
 
   const formatRevenueData = (
-    revenueByDate: Record<string, number> | undefined
+    revenueByDate: Record<string, number> | undefined,
   ): RevenueChartItem[] => {
     if (!revenueByDate) return [];
 
@@ -261,7 +241,7 @@ export default function HotelOverviewPage() {
   };
 
   const formatPaymentMethodData = (
-    revenueByPaymentMethod: Record<string, number> | undefined
+    revenueByPaymentMethod: Record<string, number> | undefined,
   ): ChartDataItem[] => {
     if (!revenueByPaymentMethod) return [];
 
@@ -279,7 +259,7 @@ export default function HotelOverviewPage() {
   };
 
   const formatRoomStatusData = (
-    roomsByStatus: Record<string, number> | undefined
+    roomsByStatus: Record<string, number> | undefined,
   ): ChartDataItem[] => {
     if (!roomsByStatus) return [];
 
@@ -456,7 +436,7 @@ export default function HotelOverviewPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart
                             data={formatRevenueData(
-                              dashboardData?.revenue?.revenueByDate
+                              dashboardData?.revenue?.revenueByDate,
                             )}
                             margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
                           >
@@ -541,7 +521,7 @@ export default function HotelOverviewPage() {
                           >
                             <Pie
                               data={formatPaymentMethodData(
-                                dashboardData?.revenue?.revenueByPaymentMethod
+                                dashboardData?.revenue?.revenueByPaymentMethod,
                               )}
                               cx="50%"
                               cy="50%"
@@ -557,7 +537,7 @@ export default function HotelOverviewPage() {
                               }
                             >
                               {formatPaymentMethodData(
-                                dashboardData?.revenue?.revenueByPaymentMethod
+                                dashboardData?.revenue?.revenueByPaymentMethod,
                               ).map((entry, index) => (
                                 <Cell
                                   key={`cell-${index}`}
@@ -606,7 +586,7 @@ export default function HotelOverviewPage() {
                           >
                             <Pie
                               data={formatRoomStatusData(
-                                dashboardData?.rooms?.roomsByStatus
+                                dashboardData?.rooms?.roomsByStatus,
                               )}
                               cx="50%"
                               cy="50%"
@@ -621,7 +601,7 @@ export default function HotelOverviewPage() {
                               }
                             >
                               {formatRoomStatusData(
-                                dashboardData?.rooms?.roomsByStatus
+                                dashboardData?.rooms?.roomsByStatus,
                               ).map((entry, index) => (
                                 <Cell
                                   key={`cell-${index}`}
@@ -683,7 +663,7 @@ export default function HotelOverviewPage() {
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap">
                                       {new Date(
-                                        change.changedAt
+                                        change.changedAt,
                                       ).toLocaleString("vi-VN", {
                                         hour: "2-digit",
                                         minute: "2-digit",
@@ -720,7 +700,7 @@ export default function HotelOverviewPage() {
                         Tổng cộng {dashboardData?.inventory?.totalItems || 0}{" "}
                         mặt hàng với giá trị{" "}
                         {formatCurrency(
-                          dashboardData?.inventory?.totalValue || 0
+                          dashboardData?.inventory?.totalValue || 0,
                         )}{" "}
                         VND
                       </CardDescription>
@@ -846,7 +826,7 @@ export default function HotelOverviewPage() {
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap">
                                       {new Date(
-                                        booking.checkInDate
+                                        booking.checkInDate,
                                       ).toLocaleString("vi-VN", {
                                         hour: "2-digit",
                                         minute: "2-digit",
@@ -856,7 +836,7 @@ export default function HotelOverviewPage() {
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap">
                                       {new Date(
-                                        booking.checkOutDate
+                                        booking.checkOutDate,
                                       ).toLocaleString("vi-VN", {
                                         hour: "2-digit",
                                         minute: "2-digit",
@@ -868,7 +848,7 @@ export default function HotelOverviewPage() {
                                       {renderRoomStatus(booking.status)}
                                     </TableCell>
                                   </TableRow>
-                                )
+                                ),
                               )
                             )}
                           </TableBody>

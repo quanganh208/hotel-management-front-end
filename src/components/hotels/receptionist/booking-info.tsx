@@ -23,7 +23,7 @@ function calculateDuration(checkInDate: string, checkOutDate: string) {
     const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor(
-      (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
 
     if (diffDays > 0) {

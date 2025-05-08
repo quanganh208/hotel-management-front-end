@@ -16,7 +16,7 @@ interface EditBookingFormProps {
   };
   isSubmitting: boolean;
   onInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   onNumberInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }

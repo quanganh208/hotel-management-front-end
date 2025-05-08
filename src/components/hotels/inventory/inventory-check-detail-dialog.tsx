@@ -85,7 +85,7 @@ export function InventoryCheckDetailDialog({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editedNote, setEditedNote] = useState("");
   const [editedItems, setEditedItems] = useState<EditableInventoryCheckItem[]>(
-    []
+    [],
   );
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -211,7 +211,7 @@ export function InventoryCheckDetailDialog({
           };
         }
         return item;
-      })
+      }),
     );
   };
 
@@ -239,7 +239,7 @@ export function InventoryCheckDetailDialog({
 
     const totalDifference = editedItems.reduce(
       (sum, item) => sum + item.difference,
-      0
+      0,
     );
 
     const totalIncrease = editedItems
@@ -366,7 +366,7 @@ export function InventoryCheckDetailDialog({
                           </div>
                           <div>
                             {getStatusBadge(
-                              selectedCheck.status as InventoryCheckStatus
+                              selectedCheck.status as InventoryCheckStatus,
                             )}
                           </div>
                         </div>
@@ -443,7 +443,7 @@ export function InventoryCheckDetailDialog({
                             <span className="font-medium">
                               {
                                 selectedCheck.items.filter(
-                                  (item) => item.difference !== 0
+                                  (item) => item.difference !== 0,
                                 ).length
                               }
                             </span>
@@ -530,7 +530,7 @@ export function InventoryCheckDetailDialog({
                                       onChange={(e) =>
                                         handleUpdateActualStock(
                                           item.inventoryItemId,
-                                          e.target.value
+                                          e.target.value,
                                         )
                                       }
                                       className="w-20 h-8 text-right"
@@ -556,7 +556,7 @@ export function InventoryCheckDetailDialog({
                                       className="h-8 w-8"
                                       onClick={() =>
                                         handleStartEditingItem(
-                                          item.inventoryItemId
+                                          item.inventoryItemId,
                                         )
                                       }
                                     >
@@ -581,7 +581,7 @@ export function InventoryCheckDetailDialog({
                               </TableCell>
                               {isEditing && <TableCell></TableCell>}
                             </TableRow>
-                          )
+                          ),
                         )
                       )}
                     </TableBody>

@@ -496,7 +496,7 @@ export default function InventoryStockPage() {
                               </TableCell>
                               <TableCell className="text-center">
                                 {getStatusBadge(
-                                  check.status as InventoryCheckStatus
+                                  check.status as InventoryCheckStatus,
                                 )}
                               </TableCell>
                             </motion.tr>
