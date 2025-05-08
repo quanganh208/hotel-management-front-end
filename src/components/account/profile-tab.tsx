@@ -384,6 +384,9 @@ export default function ProfileTab({
                   <SelectItem value="OTHER">Khác</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Thông tin giới tính giúp chúng tôi phục vụ bạn tốt hơn
+              </p>
             </div>
           </div>
 
