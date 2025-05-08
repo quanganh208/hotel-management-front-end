@@ -45,6 +45,9 @@ export interface LoginResponse {
   access_token: string;
   image?: string;
   role?: string;
+  requiresTwoFactor?: boolean;
+  userId?: string;
+  message?: string;
 }
 
 export interface ApiError {

@@ -30,6 +30,15 @@ export interface LoginFormErrors {
   password: string;
 }
 
+export interface TwoFactorForm {
+  userId: string;
+  code: string;
+}
+
+export interface TwoFactorFormErrors {
+  code: string;
+}
+
 export interface VerifyForm {
   email: string;
   verificationCode: string;
@@ -58,6 +67,12 @@ export interface AuthState {
   error: string;
   success: string;
 
+  // 2FA state
+  requiresTwoFactor: boolean;
+  pendingUserId: string | null;
+  twoFactorForm: TwoFactorForm;
+  twoFactorFormErrors: TwoFactorFormErrors;
+
   // Form states
   registerForm: RegisterForm;
   registerFormErrors: RegisterFormErrors;
@@ -85,6 +100,14 @@ export interface AuthState {
   login: () => Promise<boolean>;
   loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
+
+  // Form actions - 2FA
+  setTwoFactorForm: (field: keyof TwoFactorForm, value: string) => void;
+  validateTwoFactorField: (field: keyof TwoFactorForm) => boolean;
+  validateAllTwoFactorFields: () => boolean;
+  resetTwoFactorForm: () => void;
+  verifyTwoFactor: () => Promise<boolean>;
+  setRequiresTwoFactor: (requires: boolean, userId?: string) => void;
 
   // Form actions - Verification
   setVerificationCode: (code: string) => void;

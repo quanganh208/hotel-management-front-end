@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Sparkles,
+  User,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -116,29 +117,34 @@ export default function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/dashboard/account"
+                      className="flex w-full cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Tài khoản
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Sparkles />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Nâng cấp lên Pro
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
-                    <BadgeCheck />
-                    Tài khoản
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <CreditCard />
+                    <CreditCard className="mr-2 h-4 w-4" />
                     Thanh toán
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Bell />
+                    <Bell className="mr-2 h-4 w-4" />
                     Thông báo
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut />
+                  <LogOut className="mr-2 h-4 w-4" />
                   Đăng xuất
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -196,7 +202,7 @@ export default function Header() {
                             onClick={() => setOpen(false)}
                           >
                             <Link
-                              href="#"
+                              href="/dashboard/account"
                               className="flex w-full items-center justify-center"
                             >
                               Tài khoản

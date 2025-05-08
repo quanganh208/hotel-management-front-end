@@ -7,6 +7,7 @@ import type {
   RegisterForm,
   LoginForm,
   ResetPasswordForm,
+  TwoFactorForm,
 } from "@/types/auth";
 
 // Lỗi validation
@@ -23,6 +24,8 @@ const VALIDATION_ERRORS = {
   INVALID_CODE: "Mã xác thực chỉ được chứa các chữ số",
   INVALID_CODE_LENGTH: "Mã xác thực phải đủ 8 chữ số",
   MISSING_EMAIL: "Không tìm thấy email để xác thực",
+  EMPTY_2FA_CODE: "Vui lòng nhập mã xác thực 2FA",
+  INVALID_2FA_CODE: "Mã xác thực 2FA phải là 6 chữ số",
 };
 
 // Lỗi API
@@ -39,6 +42,7 @@ const API_ERRORS = {
     "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau.",
   RESET_PASSWORD_FAILED:
     "Không thể đặt lại mật khẩu. Token không hợp lệ hoặc đã hết hạn.",
+  TWO_FACTOR_FAILED: "Xác thực 2FA không thành công. Vui lòng thử lại.",
 };
 
 // Thông báo thành công
@@ -49,6 +53,7 @@ const SUCCESS_MESSAGES = {
   FORGOT_PASSWORD_SUCCESS:
     "Đã gửi email hướng dẫn đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn.",
   RESET_PASSWORD_SUCCESS: "Đặt lại mật khẩu thành công",
+  TWO_FACTOR_SUCCESS: "Xác thực 2FA thành công",
 };
 
 // Khởi tạo giá trị mặc định
@@ -59,6 +64,17 @@ const initialState = {
   isLoading: false,
   error: "",
   success: "",
+
+  // 2FA state
+  requiresTwoFactor: false,
+  pendingUserId: null,
+  twoFactorForm: {
+    userId: "",
+    code: "",
+  },
+  twoFactorFormErrors: {
+    code: "",
+  },
 
   // Form states
   registerForm: {
@@ -241,7 +257,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateRegisterField(field),
+          get().validateRegisterField(field)
         );
         return results.every((result) => result === true);
       },
@@ -305,13 +321,6 @@ export const useAuthStore = create<AuthState>()(
                   password: VALIDATION_ERRORS.EMPTY_PASSWORD,
                 },
               }));
-            } else if (loginForm.password.length < 6) {
-              set((state) => ({
-                loginFormErrors: {
-                  ...state.loginFormErrors,
-                  password: VALIDATION_ERRORS.SHORT_PASSWORD,
-                },
-              }));
             } else {
               set((state) => ({
                 loginFormErrors: {
@@ -335,9 +344,282 @@ export const useAuthStore = create<AuthState>()(
 
       resetLoginForm: () => {
         set(() => ({
-          loginForm: initialState.loginForm,
-          loginFormErrors: initialState.loginFormErrors,
+          loginForm: {
+            email: "",
+            password: "",
+          },
+          loginFormErrors: {
+            email: "",
+            password: "",
+          },
         }));
+      },
+
+      login: async () => {
+        const { loginForm, validateAllLoginFields } = get();
+
+        // Validate all fields first
+        if (!validateAllLoginFields()) {
+          return false;
+        }
+
+        // Start loading
+        set({ isLoading: true, error: "", success: "" });
+
+        try {
+          const result = await signIn("credentials", {
+            email: loginForm.email,
+            password: loginForm.password,
+            redirect: false,
+          });
+
+          // Xử lý kết quả
+          if (result?.error) {
+            // Kiểm tra nếu lỗi là yêu cầu 2FA
+            if (result.error.startsWith("REQUIRES_2FA:")) {
+              const userId = result.error.replace("REQUIRES_2FA:", "");
+              set({
+                requiresTwoFactor: true,
+                pendingUserId: userId,
+                twoFactorForm: {
+                  userId: userId,
+                  code: "",
+                },
+                isLoading: false,
+              });
+              return false;
+            }
+
+            set({
+              error: result.error,
+              isLoading: false,
+            });
+            return false;
+          }
+
+          // Đăng nhập thành công
+          set({
+            success: SUCCESS_MESSAGES.LOGIN_SUCCESS,
+            isLoading: false,
+            requiresTwoFactor: false,
+            pendingUserId: null,
+          });
+          return true;
+        } catch (error) {
+          set({
+            error: API_ERRORS.CONNECTION,
+            isLoading: false,
+          });
+          return false;
+        }
+      },
+
+      loginWithGoogle: async () => {
+        set(() => ({ isLoading: true, error: "", success: "" }));
+
+        try {
+          const result = await signIn("google", {
+            redirect: false,
+            callbackUrl: "/dashboard",
+          });
+
+          if (result?.error) {
+            set(() => ({ error: result.error as string }));
+            return false;
+          }
+
+          set(() => ({ success: SUCCESS_MESSAGES.LOGIN_SUCCESS }));
+          return true;
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          // Xử lý lỗi từ URL error param nếu có
+          if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            const errorParam = url.searchParams.get("error");
+
+            if (errorParam) {
+              const decodedError = decodeURIComponent(errorParam);
+              set(() => ({ error: decodedError }));
+
+              // Xóa param error khỏi URL để không hiển thị trong địa chỉ
+              url.searchParams.delete("error");
+              window.history.replaceState({}, document.title, url.toString());
+
+              return false;
+            }
+          }
+
+          const errorMessage =
+            err instanceof Error ? err.message : API_ERRORS.GOOGLE_LOGIN_FAILED;
+
+          set(() => ({ error: errorMessage }));
+          return false;
+        } finally {
+          set(() => ({ isLoading: false }));
+        }
+      },
+
+      logout: async () => {
+        set(() => ({ isLoading: true }));
+
+        try {
+          await signOut({ redirect: false });
+
+          set(() => ({
+            user: null,
+            token: null,
+            success: SUCCESS_MESSAGES.LOGOUT_SUCCESS,
+          }));
+        } finally {
+          set(() => ({ isLoading: false }));
+        }
+      },
+
+      // --- FORM ACTIONS: 2FA ---
+      setTwoFactorForm: (field, value) => {
+        set((state) => ({
+          twoFactorForm: {
+            ...state.twoFactorForm,
+            [field]: value,
+          },
+        }));
+      },
+
+      validateTwoFactorField: (field) => {
+        const { twoFactorForm } = get();
+        let isValid = false;
+
+        switch (field) {
+          case "code":
+            if (!twoFactorForm.code) {
+              set((state) => ({
+                twoFactorFormErrors: {
+                  ...state.twoFactorFormErrors,
+                  code: VALIDATION_ERRORS.EMPTY_2FA_CODE,
+                },
+              }));
+            } else {
+              const codeRegex = /^\d{6}$/;
+              if (!codeRegex.test(twoFactorForm.code)) {
+                set((state) => ({
+                  twoFactorFormErrors: {
+                    ...state.twoFactorFormErrors,
+                    code: VALIDATION_ERRORS.INVALID_2FA_CODE,
+                  },
+                }));
+              } else {
+                set((state) => ({
+                  twoFactorFormErrors: {
+                    ...state.twoFactorFormErrors,
+                    code: "",
+                  },
+                }));
+                isValid = true;
+              }
+            }
+            break;
+
+          case "userId":
+            isValid = !!twoFactorForm.userId;
+            break;
+        }
+
+        return isValid;
+      },
+
+      validateAllTwoFactorFields: () => {
+        const fields: (keyof TwoFactorForm)[] = ["userId", "code"];
+        const results = fields.map((field) =>
+          get().validateTwoFactorField(field)
+        );
+        return results.every((result) => result === true);
+      },
+
+      resetTwoFactorForm: () => {
+        set(() => ({
+          twoFactorForm: {
+            userId: "",
+            code: "",
+          },
+          twoFactorFormErrors: {
+            code: "",
+          },
+        }));
+      },
+
+      verifyTwoFactor: async () => {
+        const { twoFactorForm, validateAllTwoFactorFields } = get();
+
+        // Validate all fields first
+        if (!validateAllTwoFactorFields()) {
+          return false;
+        }
+
+        // Start loading
+        set({ isLoading: true, error: "", success: "" });
+
+        try {
+          const response = await axiosInstance.post("/auth/2fa/authenticate", {
+            userId: twoFactorForm.userId,
+            code: twoFactorForm.code,
+          });
+
+          if (response.data && response.data.access_token) {
+            // Đăng nhập với token nhận được
+            const result = await signIn("credentials", {
+              twoFactorToken: response.data.access_token,
+              redirect: false,
+            });
+
+            if (result?.error) {
+              set({
+                error: result.error,
+                isLoading: false,
+              });
+              return false;
+            }
+
+            // Xác thực 2FA thành công
+            set({
+              success: SUCCESS_MESSAGES.TWO_FACTOR_SUCCESS,
+              isLoading: false,
+              requiresTwoFactor: false,
+              pendingUserId: null,
+            });
+            return true;
+          }
+
+          set({
+            error: API_ERRORS.TWO_FACTOR_FAILED,
+            isLoading: false,
+          });
+          return false;
+        } catch (error: any) {
+          // Xử lý lỗi từ API
+          if (error.response?.data?.message) {
+            set({
+              error: error.response.data.message,
+              isLoading: false,
+            });
+          } else {
+            set({
+              error: API_ERRORS.TWO_FACTOR_FAILED,
+              isLoading: false,
+            });
+          }
+          return false;
+        }
+      },
+
+      setRequiresTwoFactor: (requires: boolean, userId?: string) => {
+        set({
+          requiresTwoFactor: requires,
+          pendingUserId: userId || null,
+          twoFactorForm: {
+            userId: userId || "",
+            code: "",
+          },
+        });
       },
 
       // --- FORM ACTIONS: VERIFICATION ---
@@ -410,197 +692,6 @@ export const useAuthStore = create<AuthState>()(
             errorMessage = err.response.data.message;
           } else if (err.code === "ECONNREFUSED") {
             errorMessage = API_ERRORS.CONNECTION;
-          }
-
-          set(() => ({ error: errorMessage }));
-        } finally {
-          set(() => ({ isLoading: false }));
-        }
-      },
-
-      // --- API ACTIONS: LOGIN ---
-      login: async () => {
-        const { loginForm, validateAllLoginFields } = get();
-
-        if (!validateAllLoginFields()) return false;
-
-        set(() => ({ isLoading: true, error: "", success: "" }));
-
-        try {
-          const result = await signIn("credentials", {
-            email: loginForm.email,
-            password: loginForm.password,
-            redirect: false,
-          });
-
-          if (result?.error) {
-            // Save the email for verification if it's an inactive account error
-            if (result.error.startsWith("INACTIVE_ACCOUNT:")) {
-              if (typeof window !== "undefined") {
-                localStorage.setItem("verificationEmail", loginForm.email);
-              }
-              // Also update the verification form email
-              set((state) => ({
-                verifyForm: {
-                  ...state.verifyForm,
-                  email: loginForm.email,
-                },
-              }));
-            }
-
-            set(() => ({ error: result.error as string }));
-            return false;
-          }
-
-          set(() => ({ success: SUCCESS_MESSAGES.LOGIN_SUCCESS }));
-          return true;
-          //eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-          const errorMessage =
-            err instanceof Error ? err.message : API_ERRORS.LOGIN_FAILED;
-
-          set(() => ({ error: errorMessage }));
-          return false;
-        } finally {
-          set(() => ({ isLoading: false }));
-        }
-      },
-
-      loginWithGoogle: async () => {
-        set(() => ({ isLoading: true, error: "", success: "" }));
-
-        try {
-          const result = await signIn("google", {
-            redirect: false,
-            callbackUrl: "/dashboard",
-          });
-
-          if (result?.error) {
-            set(() => ({ error: result.error as string }));
-            return false;
-          }
-
-          set(() => ({ success: SUCCESS_MESSAGES.LOGIN_SUCCESS }));
-          return true;
-          //eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-          // Xử lý lỗi từ URL error param nếu có
-          if (typeof window !== "undefined") {
-            const url = new URL(window.location.href);
-            const errorParam = url.searchParams.get("error");
-
-            if (errorParam) {
-              const decodedError = decodeURIComponent(errorParam);
-              set(() => ({ error: decodedError }));
-
-              // Xóa param error khỏi URL để không hiển thị trong địa chỉ
-              url.searchParams.delete("error");
-              window.history.replaceState({}, document.title, url.toString());
-
-              return false;
-            }
-          }
-
-          const errorMessage =
-            err instanceof Error ? err.message : API_ERRORS.GOOGLE_LOGIN_FAILED;
-
-          set(() => ({ error: errorMessage }));
-          return false;
-        } finally {
-          set(() => ({ isLoading: false }));
-        }
-      },
-
-      logout: async () => {
-        set(() => ({ isLoading: true }));
-
-        try {
-          await signOut({ redirect: false });
-
-          set(() => ({
-            user: null,
-            token: null,
-            success: SUCCESS_MESSAGES.LOGOUT_SUCCESS,
-          }));
-        } finally {
-          set(() => ({ isLoading: false }));
-        }
-      },
-
-      // --- API ACTIONS: VERIFICATION ---
-      verifyAccount: async () => {
-        const { verifyForm, validateVerificationCode } = get();
-
-        if (!verifyForm.email) {
-          set(() => ({ error: VALIDATION_ERRORS.MISSING_EMAIL }));
-          return;
-        }
-
-        if (!validateVerificationCode()) return;
-
-        set(() => ({ isLoading: true, error: "", success: "" }));
-
-        try {
-          const data = {
-            email: verifyForm.email,
-            verificationCode: verifyForm.verificationCode,
-          };
-
-          const response = await axiosInstance.post("/auth/activate", data);
-
-          if (response.data?.message) {
-            set(() => ({
-              success: response.data.message,
-              verifyForm: {
-                ...get().verifyForm,
-                verificationCode: "",
-              },
-            }));
-
-            if (typeof window !== "undefined") {
-              localStorage.removeItem("verificationEmail");
-            }
-          }
-          //eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-          let errorMessage = API_ERRORS.VERIFY_FAILED;
-
-          if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
-          } else if (err.code === "ECONNREFUSED") {
-            errorMessage = API_ERRORS.CONNECTION;
-          }
-
-          set(() => ({ error: errorMessage }));
-        } finally {
-          set(() => ({ isLoading: false }));
-        }
-      },
-
-      verificationCode: async () => {
-        const { verifyForm } = get();
-
-        if (!verifyForm.email) {
-          set(() => ({ error: VALIDATION_ERRORS.MISSING_EMAIL }));
-          return;
-        }
-
-        set(() => ({ isLoading: true, error: "", success: "" }));
-
-        try {
-          const response = await axiosInstance.post("/auth/send-activation", {
-            email: verifyForm.email,
-          });
-
-          if (response.data?.message) {
-            set(() => ({ success: SUCCESS_MESSAGES.CODE_SUCCESS }));
-          }
-          //eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-          let errorMessage = API_ERRORS.CODE_FAILED;
-
-          if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
           }
 
           set(() => ({ error: errorMessage }));
@@ -760,7 +851,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateResetPasswordField(field),
+          get().validateResetPasswordField(field)
         );
         return results.every((result) => result === true);
       },
@@ -802,47 +893,102 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // --- COMMON ACTIONS ---
-      setError: (error) => set(() => ({ error })),
-      setSuccess: (success) => set(() => ({ success })),
-      resetMessages: () =>
-        set(() => ({
-          error: "",
-          success: "",
-          verifyFormError: "",
-          forgotPasswordFormError: "",
-          resetPasswordFormErrors: {
-            newPassword: "",
-            confirmPassword: "",
-          },
-        })),
+      verificationCode: async () => {
+        const { verifyForm } = get();
+
+        if (!verifyForm.email) {
+          set(() => ({ error: VALIDATION_ERRORS.MISSING_EMAIL }));
+          return;
+        }
+
+        set(() => ({ isLoading: true, error: "", success: "" }));
+
+        try {
+          const response = await axiosInstance.post("/auth/send-activation", {
+            email: verifyForm.email,
+          });
+
+          if (response.data?.message) {
+            set(() => ({ success: SUCCESS_MESSAGES.CODE_SUCCESS }));
+          }
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          let errorMessage = API_ERRORS.CODE_FAILED;
+
+          if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          }
+
+          set(() => ({ error: errorMessage }));
+        } finally {
+          set(() => ({ isLoading: false }));
+        }
+      },
+
+      // --- API ACTIONS: VERIFICATION ---
+      verifyAccount: async () => {
+        const { verifyForm, validateVerificationCode } = get();
+
+        if (!verifyForm.email) {
+          set(() => ({ error: VALIDATION_ERRORS.MISSING_EMAIL }));
+          return;
+        }
+
+        if (!validateVerificationCode()) return;
+
+        set(() => ({ isLoading: true, error: "", success: "" }));
+
+        try {
+          const data = {
+            email: verifyForm.email,
+            verificationCode: verifyForm.verificationCode,
+          };
+
+          const response = await axiosInstance.post("/auth/activate", data);
+
+          if (response.data?.message) {
+            set(() => ({
+              success: response.data.message,
+              verifyForm: {
+                ...get().verifyForm,
+                verificationCode: "",
+              },
+            }));
+
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("verificationEmail");
+            }
+          }
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          let errorMessage = API_ERRORS.VERIFY_FAILED;
+
+          if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
+          } else if (err.code === "ECONNREFUSED") {
+            errorMessage = API_ERRORS.CONNECTION;
+          }
+
+          set(() => ({ error: errorMessage }));
+        } finally {
+          set(() => ({ isLoading: false }));
+        }
+      },
+
+      // Common actions
+      setError: (error) => set({ error }),
+      setSuccess: (success) => set({ success }),
+      resetMessages: () => set({ error: "", success: "" }),
     }),
     {
-      name: "auth-storage",
+      name: "auth-store",
       partialize: (state) => ({
+        // Lưu trữ vào localStorage
         user: state.user,
         token: state.token,
-        verifyForm: {
-          email: state.verifyForm.email,
-          verificationCode: "",
-        },
-        error: "",
-        success: "",
-        verifyFormError: "",
-        forgotPasswordForm: {
-          email: state.forgotPasswordForm.email,
-        },
-        forgotPasswordFormError: "",
-        resetPasswordForm: {
-          token: "",
-          newPassword: "",
-          confirmPassword: "",
-        },
-        resetPasswordFormErrors: {
-          newPassword: "",
-          confirmPassword: "",
-        },
+        requiresTwoFactor: state.requiresTwoFactor,
+        pendingUserId: state.pendingUserId,
       }),
-    },
-  ),
+    }
+  )
 );

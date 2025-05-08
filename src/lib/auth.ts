@@ -11,8 +11,33 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        twoFactorToken: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
+        // Nếu có token 2FA, sử dụng token đó để đăng nhập
+        if (credentials?.twoFactorToken) {
+          try {
+            // Giải mã token và trả về thông tin người dùng
+            const userData = JSON.parse(
+              atob(credentials.twoFactorToken.split(".")[1])
+            );
+
+            return {
+              id: userData.sub,
+              name: userData.name,
+              email: userData.email,
+              accessToken: credentials.twoFactorToken,
+              role: userData.role,
+              image:
+                userData.image ||
+                `/api/avatar?name=${encodeURIComponent(userData.name)}`,
+            };
+          } catch (error) {
+            throw new Error("Token 2FA không hợp lệ");
+          }
+        }
+
+        // Đăng nhập thông thường
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email và mật khẩu là bắt buộc");
         }
@@ -22,6 +47,11 @@ export const authOptions: AuthOptions = {
             credentials.email,
             credentials.password
           );
+
+          // Kiểm tra nếu cần xác thực 2FA
+          if (response.requiresTwoFactor) {
+            throw new Error(`REQUIRES_2FA:${response.userId}`);
+          }
 
           if (response && response.access_token) {
             return {
@@ -59,6 +89,14 @@ export const authOptions: AuthOptions = {
             }
 
             throw new Error(apiError.message);
+          }
+
+          // Nếu là lỗi từ mã của chúng ta (như yêu cầu 2FA), truyền tiếp
+          if (
+            error instanceof Error &&
+            error.message.startsWith("REQUIRES_2FA:")
+          ) {
+            throw error;
           }
 
           // Lỗi chung
@@ -171,6 +209,18 @@ export const authService = {
       return response.data;
       //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      // Nếu API trả về lỗi yêu cầu xác thực 2 yếu tố
+      if (
+        error.response?.status === 401 &&
+        error.response?.data?.requiresTwoFactor &&
+        error.response?.data?.userId
+      ) {
+        return {
+          requiresTwoFactor: true,
+          userId: error.response.data.userId,
+          message: error.response.data.message || "Yêu cầu xác thực hai yếu tố",
+        } as any;
+      }
       throw error;
     }
   },
