@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import { CalendarDays, CreditCard } from "lucide-react";
+import { CalendarDays, CreditCard, Search } from "lucide-react";
 import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { useRoomStore } from "@/store/rooms";
@@ -14,6 +14,7 @@ import RoomSearchAndFilter from "@/components/hotels/receptionist/RoomSearchAndF
 import RoomGrid from "@/components/hotels/receptionist/RoomGrid";
 import { BookingDialog } from "@/components/hotels/receptionist/booking-dialog";
 import { RoomDetailDialog } from "@/components/hotels/receptionist/room-detail-dialog";
+import { SearchBookingDialog } from "@/components/hotels/receptionist/search-booking-dialog";
 
 export default function ReceptionistPage() {
   const params = useParams();
@@ -31,6 +32,7 @@ export default function ReceptionistPage() {
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<RoomWithType | null>(null);
   const [roomDetailOpen, setRoomDetailOpen] = useState(false);
+  const [searchBookingOpen, setSearchBookingOpen] = useState(false);
 
   // Fetch rooms on component mount
   useEffect(() => {
@@ -110,6 +112,11 @@ export default function ReceptionistPage() {
     setBookingDialogOpen(true);
   };
 
+  // Handle search booking
+  const handleSearchBooking = () => {
+    setSearchBookingOpen(true);
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-zinc-950">
       <Header />
@@ -127,12 +134,12 @@ export default function ReceptionistPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button
-                onClick={handleCreateInvoice}
+                onClick={handleSearchBooking}
                 variant="secondary"
                 className="gap-2"
               >
-                <CreditCard className="h-4 w-4" />
-                Tạo hóa đơn bán lẻ
+                <Search className="h-4 w-4" />
+                Tìm kiếm đặt phòng
               </Button>
               <Button onClick={handleCreateBooking} className="gap-2">
                 <CalendarDays className="h-4 w-4" />
@@ -203,6 +210,14 @@ export default function ReceptionistPage() {
             onBookingSuccess={() => fetchRooms(hotelId)} // Refresh danh sách phòng sau khi đặt phòng thành công
           />
         )}
+
+        {/* Search Booking Dialog */}
+        <SearchBookingDialog
+          open={searchBookingOpen}
+          onOpenChange={setSearchBookingOpen}
+          hotelId={hotelId}
+          onCheckInSuccess={() => fetchRooms(hotelId)} // Refresh danh sách phòng sau khi nhận phòng thành công
+        />
       </main>
     </div>
   );

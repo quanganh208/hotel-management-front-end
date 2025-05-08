@@ -108,6 +108,10 @@ export function CheckoutInvoiceDialog({
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [paymentStatus, setPaymentStatus] =
     useState<PaymentCheckResponse | null>(null);
+  // Thêm state để lưu trữ QR data cho mỗi hóa đơn
+  const [savedQrData, setSavedQrData] = useState<
+    Record<string, PaymentQRResponse>
+  >({});
 
   // Ref để lưu trữ interval ID
   const paymentCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -138,7 +142,7 @@ export function CheckoutInvoiceDialog({
       setEditableItems([]);
       setIsGeneratingQR(false);
 
-      // Không reset qrCodeData khi đóng dialog, chỉ reset khi chuyển phòng
+      // Không reset qrCodeData và savedQrData khi đóng dialog
       setShowQrDialog(false);
       setIsCheckingPayment(false);
       setPaymentStatus(null);
@@ -147,9 +151,9 @@ export function CheckoutInvoiceDialog({
       setDiscount(invoice.discount || 0);
       setEditableItems(invoice.items.map((item) => ({ ...item })));
 
-      // Reset QR data nếu thay đổi invoice
-      if (qrCodeData && invoice._id && qrCodeData.invoiceId !== invoice._id) {
-        setQrCodeData(null);
+      // Nếu đã có QR data cho hóa đơn này, set lại qrCodeData
+      if (savedQrData[invoice._id]) {
+        setQrCodeData(savedQrData[invoice._id]);
       }
     }
 
@@ -218,12 +222,15 @@ export function CheckoutInvoiceDialog({
   const generatePaymentQR = async () => {
     if (!invoice) return;
 
-    // Nếu đã có QR code data cho invoice hiện tại và số tiền không thay đổi, chỉ mở dialog
-    if (
-      qrCodeData &&
-      qrCodeData.invoiceId === invoice._id &&
-      qrCodeData.amount === finalAmount
-    ) {
+    // Nếu đã thanh toán thành công, chỉ hiển thị QR đã lưu
+    if (paymentStatus?.paid) {
+      setShowQrDialog(true);
+      return;
+    }
+
+    // Kiểm tra xem đã có QR data cho hóa đơn này chưa
+    if (savedQrData[invoice._id]) {
+      setQrCodeData(savedQrData[invoice._id]);
       setShowQrDialog(true);
       return;
     }
@@ -240,6 +247,11 @@ export function CheckoutInvoiceDialog({
         invoiceId: invoice._id,
       };
 
+      // Lưu QR data vào state
+      setSavedQrData((prev) => ({
+        ...prev,
+        [invoice._id]: qrData,
+      }));
       setQrCodeData(qrData);
       setShowQrDialog(true);
     } catch (error) {
@@ -318,9 +330,14 @@ export function CheckoutInvoiceDialog({
       toast.success("Cập nhật hóa đơn thành công");
       setIsEditMode(false);
 
-      // Reset QR code data sau khi cập nhật hóa đơn thành công
+      // Reset QR code data và payment status sau khi cập nhật hóa đơn thành công
       setQrCodeData(null);
       setPaymentStatus(null);
+      setSavedQrData((prev) => {
+        const newData = { ...prev };
+        delete newData[invoice._id];
+        return newData;
+      });
 
       // Xóa interval nếu có
       if (paymentCheckIntervalRef.current) {
@@ -392,10 +409,12 @@ export function CheckoutInvoiceDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Receipt className="h-5 w-5 text-primary" />
-              Hóa đơn thanh toán
+              {isEditMode ? "Chỉnh sửa hóa đơn" : "Hóa đơn thanh toán"}
             </DialogTitle>
             <DialogDescription>
-              Kiểm tra thông tin và xác nhận thanh toán trước khi trả phòng
+              {isEditMode
+                ? "Chỉnh sửa thông tin hóa đơn trước khi thanh toán"
+                : "Kiểm tra thông tin và xác nhận thanh toán trước khi trả phòng"}
             </DialogDescription>
           </DialogHeader>
 
@@ -431,13 +450,15 @@ export function CheckoutInvoiceDialog({
                       className="h-8"
                     >
                       <Pencil className="h-3.5 w-3.5 mr-1" />
-                      Sửa
+                      Chỉnh sửa
                     </Button>
                   )}
                 </div>
 
                 {editableItems.length > 0 ? (
-                  <div className="border rounded-md overflow-hidden">
+                  <div
+                    className={`border rounded-md overflow-hidden ${isEditMode ? "bg-muted/20" : ""}`}
+                  >
                     <div className="grid grid-cols-1 divide-y max-h-[300px] overflow-y-auto">
                       {editableItems.map((item, index) => (
                         <div key={index} className="p-3 flex items-center">
@@ -518,6 +539,7 @@ export function CheckoutInvoiceDialog({
                   min={0}
                   max={totalItemsAmount}
                   disabled={!isEditMode}
+                  className={isEditMode ? "bg-muted/20" : ""}
                 />
               </div>
 
@@ -545,104 +567,112 @@ export function CheckoutInvoiceDialog({
 
               <Separator />
 
-              {/* Phương thức thanh toán */}
-              <div className="space-y-2">
-                <Label>Phương thức thanh toán</Label>
-                <RadioGroup
-                  value={paymentMethod}
-                  onValueChange={(value) => {
-                    setPaymentMethod(value as "CASH" | "TRANSFER");
-                    confirmedTransactionRef.current = null;
-                    setPaymentStatus(null);
-                    // Xóa qrCodeData khi đổi phương thức thanh toán
-                    setQrCodeData(null);
-                    if (paymentCheckIntervalRef.current) {
-                      clearInterval(paymentCheckIntervalRef.current);
-                      paymentCheckIntervalRef.current = null;
-                    }
-                  }}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="CASH" id="cash" />
-                    <Label htmlFor="cash">Tiền mặt</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="TRANSFER" id="transfer" />
-                    <Label htmlFor="transfer">Chuyển khoản</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Phần thanh toán chuyển khoản */}
-              {paymentMethod === "TRANSFER" && (
-                <div className="space-y-4 border rounded-md p-4 bg-muted/10">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <Label className="text-base">
-                        Thanh toán chuyển khoản
-                      </Label>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {paymentStatus?.paid
-                          ? "Thanh toán đã được xác nhận thành công!"
-                          : "Tạo mã QR và xác nhận thanh toán trước khi trả phòng"}
-                      </p>
-                    </div>
-                    <Button
-                      variant={paymentStatus?.paid ? "secondary" : "default"}
-                      size="sm"
-                      onClick={generatePaymentQR}
-                      disabled={isGeneratingQR || isEditMode}
-                      className="h-9"
+              {/* Phần thanh toán chỉ hiển thị khi không ở chế độ sửa */}
+              {!isEditMode && (
+                <>
+                  {/* Phương thức thanh toán */}
+                  <div className="space-y-2">
+                    <Label>Phương thức thanh toán</Label>
+                    <RadioGroup
+                      value={paymentMethod}
+                      onValueChange={(value) => {
+                        setPaymentMethod(value as "CASH" | "TRANSFER");
+                        confirmedTransactionRef.current = null;
+                        setPaymentStatus(null);
+                        setQrCodeData(null);
+                        if (paymentCheckIntervalRef.current) {
+                          clearInterval(paymentCheckIntervalRef.current);
+                          paymentCheckIntervalRef.current = null;
+                        }
+                      }}
+                      className="flex gap-4"
                     >
-                      {isGeneratingQR ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <QrCode className="mr-2 h-4 w-4" />
-                      )}
-                      {paymentStatus?.paid
-                        ? "Xem lại mã QR"
-                        : "Tạo mã QR thanh toán"}
-                    </Button>
-                  </div>
-
-                  {/* Trạng thái thanh toán */}
-                  {paymentStatus && (
-                    <div
-                      className={`p-3 rounded-md text-sm ${
-                        paymentStatus.paid
-                          ? "bg-green-50 text-green-700 border border-green-200"
-                          : "bg-amber-50 text-amber-700 border border-amber-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {paymentStatus.paid ? (
-                          <CheckCircle className="h-4 w-4" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4" />
-                        )}
-                        <span>
-                          {paymentStatus.message ||
-                            (paymentStatus.paid
-                              ? `Thanh toán thành công với mã: ${confirmedTransactionRef.current}`
-                              : "Chưa nhận được thanh toán")}
-                        </span>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="CASH" id="cash" />
+                        <Label htmlFor="cash">Tiền mặt</Label>
                       </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="TRANSFER" id="transfer" />
+                        <Label htmlFor="transfer">Chuyển khoản</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Phần thanh toán chuyển khoản */}
+                  {paymentMethod === "TRANSFER" && (
+                    <div className="space-y-4 border rounded-md p-4 bg-muted/10">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <Label className="text-base">
+                            Thanh toán chuyển khoản
+                          </Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {paymentStatus?.paid
+                              ? "Thanh toán đã được xác nhận thành công!"
+                              : "Tạo mã QR và xác nhận thanh toán trước khi trả phòng"}
+                          </p>
+                        </div>
+                        <Button
+                          variant={
+                            paymentStatus?.paid ? "secondary" : "default"
+                          }
+                          size="sm"
+                          onClick={generatePaymentQR}
+                          disabled={
+                            isGeneratingQR || isEditMode || paymentStatus?.paid
+                          }
+                          className="h-9"
+                        >
+                          {isGeneratingQR ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <QrCode className="mr-2 h-4 w-4" />
+                          )}
+                          {paymentStatus?.paid
+                            ? "Đã thanh toán"
+                            : "Tạo mã QR thanh toán"}
+                        </Button>
+                      </div>
+
+                      {/* Trạng thái thanh toán */}
+                      {paymentStatus && (
+                        <div
+                          className={`p-3 rounded-md text-sm ${
+                            paymentStatus.paid
+                              ? "bg-green-50 text-green-700 border border-green-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {paymentStatus.paid ? (
+                              <CheckCircle className="h-4 w-4" />
+                            ) : (
+                              <AlertCircle className="h-4 w-4" />
+                            )}
+                            <span>
+                              {paymentStatus.message ||
+                                (paymentStatus.paid
+                                  ? `Thanh toán thành công với mã: ${confirmedTransactionRef.current}`
+                                  : "Chưa nhận được thanh toán")}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
 
-              {/* Ghi chú */}
-              <div className="space-y-2">
-                <Label>Ghi chú</Label>
-                <Textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Ghi chú thêm (nếu có)"
-                  rows={2}
-                />
-              </div>
+                  {/* Ghi chú */}
+                  <div className="space-y-2">
+                    <Label>Ghi chú</Label>
+                    <Textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Ghi chú thêm (nếu có)"
+                      rows={2}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -656,12 +686,12 @@ export function CheckoutInvoiceDialog({
                     setEditableItems(
                       invoice.items.map((item) => ({ ...item }))
                     );
-                    setDiscount(invoice.discount); // Reset về giá trị ban đầu
+                    setDiscount(invoice.discount);
                   }}
                   disabled={isSubmitting}
                   className="w-full sm:w-auto"
                 >
-                  Hủy
+                  Hủy chỉnh sửa
                 </Button>
                 <Button
                   onClick={handleUpdateInvoice}
