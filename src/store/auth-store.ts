@@ -257,7 +257,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateRegisterField(field),
+          get().validateRegisterField(field)
         );
         return results.every((result) => result === true);
       },
@@ -531,7 +531,7 @@ export const useAuthStore = create<AuthState>()(
       validateAllTwoFactorFields: () => {
         const fields: (keyof TwoFactorForm)[] = ["userId", "code"];
         const results = fields.map((field) =>
-          get().validateTwoFactorField(field),
+          get().validateTwoFactorField(field)
         );
         return results.every((result) => result === true);
       },
@@ -853,7 +853,7 @@ export const useAuthStore = create<AuthState>()(
           "confirmPassword",
         ];
         const results = fields.map((field) =>
-          get().validateResetPasswordField(field),
+          get().validateResetPasswordField(field)
         );
         return results.every((result) => result === true);
       },
@@ -981,6 +981,16 @@ export const useAuthStore = create<AuthState>()(
       setError: (error) => set({ error }),
       setSuccess: (success) => set({ success }),
       resetMessages: () => set({ error: "", success: "" }),
+
+      // Thêm phương thức xử lý captcha token cho forgot password
+      setForgotPasswordCaptchaToken: (token: string) => {
+        set((state) => ({
+          forgotPasswordForm: {
+            ...state.forgotPasswordForm,
+            captchaToken: token,
+          },
+        }));
+      },
     }),
     {
       name: "auth-store",
@@ -991,6 +1001,6 @@ export const useAuthStore = create<AuthState>()(
         requiresTwoFactor: state.requiresTwoFactor,
         pendingUserId: state.pendingUserId,
       }),
-    },
-  ),
+    }
+  )
 );

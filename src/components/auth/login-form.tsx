@@ -20,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth-store";
 import TwoFactorForm from "./two-factor-form";
+import TurnstileSimple from "@/components/ui/turnstile-simple";
+import { TURNSTILE_SITE_KEY } from "@/lib/turnstile-config";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -42,6 +44,8 @@ export default function LoginForm() {
 
   // State cho hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false);
+  // State cho captcha token
+  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   // Reset thông báo khi component mount và kiểm tra lỗi từ URL
   useEffect(() => {
@@ -57,7 +61,7 @@ export default function LoginForm() {
 
         if (decodedError === "OAuthCallback") {
           setError(
-            "Đăng nhập với Google không thành công. Vui lòng thử lại sau.",
+            "Đăng nhập với Google không thành công. Vui lòng thử lại sau."
           );
         } else if (decodedError !== "Callback") {
           setError(decodedError);
@@ -88,9 +92,27 @@ export default function LoginForm() {
     validateLoginField(field);
   };
 
+  // Xử lý captcha verification
+  const handleCaptchaVerify = (token: string) => {
+    setLoginForm("captchaToken", token);
+    setCaptchaVerified(true);
+  };
+
+  // Xử lý captcha expiry
+  const handleCaptchaExpire = () => {
+    setLoginForm("captchaToken", "");
+    setCaptchaVerified(false);
+  };
+
   // Xử lý submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaVerified) {
+      setError("Vui lòng xác minh captcha trước khi đăng nhập");
+      return;
+    }
+
     const loginSuccess = await login();
 
     if (loginSuccess) {
@@ -249,18 +271,32 @@ export default function LoginForm() {
                 </motion.p>
               )}
             </div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang đăng nhập...
-                  </>
-                ) : (
-                  "Đăng nhập"
-                )}
-              </Button>
-            </motion.div>
+
+            {/* Thêm Turnstile Captcha */}
+            <div className="space-y-2">
+              <Label>Xác minh bảo mật</Label>
+              <TurnstileSimple
+                siteKey={TURNSTILE_SITE_KEY}
+                onVerify={handleCaptchaVerify}
+                onExpire={handleCaptchaExpire}
+                className="mt-2"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full transition-all duration-300"
+              disabled={isLoading || !captchaVerified}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Đang đăng nhập...</span>
+                </div>
+              ) : (
+                "Đăng nhập"
+              )}
+            </Button>
           </form>
 
           <div className="relative">

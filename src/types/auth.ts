@@ -11,6 +11,7 @@ export interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
+  captchaToken?: string;
 }
 
 export interface RegisterFormErrors {
@@ -23,6 +24,7 @@ export interface RegisterFormErrors {
 export interface LoginForm {
   email: string;
   password: string;
+  captchaToken?: string;
 }
 
 export interface LoginFormErrors {
@@ -46,6 +48,7 @@ export interface VerifyForm {
 
 export interface ForgotPasswordForm {
   email: string;
+  captchaToken?: string;
 }
 
 export interface ResetPasswordForm {
@@ -120,6 +123,7 @@ export interface AuthState {
   validateForgotPasswordEmail: () => boolean;
   resetForgotPasswordForm: () => void;
   forgotPassword: () => Promise<void>;
+  setForgotPasswordCaptchaToken: (token: string) => void;
 
   // Form actions - Reset Password
   setResetPasswordForm: (field: keyof ResetPasswordForm, value: string) => void;

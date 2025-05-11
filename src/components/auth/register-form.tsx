@@ -20,6 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth-store";
+import TurnstileSimple from "@/components/ui/turnstile-simple";
+import { TURNSTILE_SITE_KEY } from "@/lib/turnstile-config";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -41,6 +43,8 @@ export default function RegisterForm() {
   // State cho hiển thị mật khẩu
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // State cho captcha token
+  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   // Reset thông báo khi component mount và kiểm tra lỗi từ URL
   useEffect(() => {
@@ -87,21 +91,39 @@ export default function RegisterForm() {
   // Xử lý khi thay đổi giá trị input
   const handleInputChange = (
     field: "name" | "email" | "password" | "confirmPassword",
-    value: string,
+    value: string
   ) => {
     setRegisterForm(field, value);
   };
 
   // Xử lý khi blur input để validate
   const handleInputBlur = (
-    field: "name" | "email" | "password" | "confirmPassword",
+    field: "name" | "email" | "password" | "confirmPassword"
   ) => {
     validateRegisterField(field);
+  };
+
+  // Xử lý captcha verification
+  const handleCaptchaVerify = (token: string) => {
+    setRegisterForm("captchaToken", token);
+    setCaptchaVerified(true);
+  };
+
+  // Xử lý captcha expiry
+  const handleCaptchaExpire = () => {
+    setRegisterForm("captchaToken", "");
+    setCaptchaVerified(false);
   };
 
   // Xử lý submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaVerified) {
+      setError("Vui lòng xác minh captcha trước khi đăng ký");
+      return;
+    }
+
     await register();
   };
 
@@ -302,18 +324,30 @@ export default function RegisterForm() {
               )}
             </div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang đăng ký...
-                  </>
-                ) : (
-                  "Đăng ký"
-                )}
-              </Button>
-            </motion.div>
+            <div className="space-y-2">
+              <Label>Xác minh bảo mật</Label>
+              <TurnstileSimple
+                siteKey={TURNSTILE_SITE_KEY}
+                onVerify={handleCaptchaVerify}
+                onExpire={handleCaptchaExpire}
+                className="mt-2"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full transition-all duration-300"
+              disabled={isLoading || !captchaVerified}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Đang đăng ký...</span>
+                </div>
+              ) : (
+                "Đăng ký"
+              )}
+            </Button>
           </form>
 
           <div className="relative my-4">

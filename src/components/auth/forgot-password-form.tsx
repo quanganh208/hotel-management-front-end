@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth-store";
+import TurnstileSimple from "@/components/ui/turnstile-simple";
+import { TURNSTILE_SITE_KEY } from "@/lib/turnstile-config";
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
@@ -36,16 +38,38 @@ export default function ForgotPasswordForm() {
     validateForgotPasswordEmail,
     forgotPassword,
     resetMessages,
+    setError,
+    setForgotPasswordCaptchaToken,
   } = useAuthStore();
+
+  // State cho captcha token
+  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   // Reset error message khi component mount
   useEffect(() => {
     resetMessages();
   }, [resetMessages]);
 
+  // Xử lý captcha verification
+  const handleCaptchaVerify = (token: string) => {
+    setForgotPasswordCaptchaToken(token);
+    setCaptchaVerified(true);
+  };
+
+  // Xử lý captcha expiry
+  const handleCaptchaExpire = () => {
+    setForgotPasswordCaptchaToken("");
+    setCaptchaVerified(false);
+  };
+
   // Xử lý gửi form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!captchaVerified) {
+      setError("Vui lòng xác minh captcha trước khi gửi yêu cầu");
+      return;
+    }
 
     // Gọi API quên mật khẩu
     await forgotPassword();
@@ -106,18 +130,13 @@ export default function ForgotPasswordForm() {
                   tra thư mục spam hoặc thử lại với một địa chỉ email khác.
                 </p>
               </div>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/auth/login")}
               >
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/auth/login")}
-                >
-                  Quay lại đăng nhập
-                </Button>
-              </motion.div>
+                Quay lại đăng nhập
+              </Button>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -146,21 +165,31 @@ export default function ForgotPasswordForm() {
                 )}
               </div>
 
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              {/* Thêm Turnstile Captcha */}
+              <div className="space-y-2">
+                <Label>Xác minh bảo mật</Label>
+                <TurnstileSimple
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onVerify={handleCaptchaVerify}
+                  onExpire={handleCaptchaExpire}
+                  className="mt-2"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full transition-all duration-300"
+                disabled={isLoading || !captchaVerified}
               >
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang gửi...
-                    </>
-                  ) : (
-                    "Gửi email đặt lại mật khẩu"
-                  )}
-                </Button>
-              </motion.div>
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span>Đang gửi...</span>
+                  </div>
+                ) : (
+                  "Gửi email đặt lại mật khẩu"
+                )}
+              </Button>
             </form>
           )}
         </CardContent>
