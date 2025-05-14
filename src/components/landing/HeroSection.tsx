@@ -8,20 +8,6 @@ import Link from "next/link";
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden">
-      <motion.div
-        className="absolute inset-0 z-0"
-        initial={{ scale: 1.1, opacity: 0.8 }}
-        animate={{ scale: 1, opacity: 0.2 }}
-        transition={{ duration: 1.5 }}
-      >
-        <Image
-          src="/placeholder.svg?height=800&width=1920"
-          alt="Hotel Management Software"
-          fill
-          className="object-cover"
-          priority
-        />
-      </motion.div>
       <div className="container relative z-10 py-24 lg:py-32">
         <div className="grid gap-8 lg:grid-cols-2 items-center">
           <div className="space-y-6">
@@ -119,7 +105,7 @@ export default function HeroSection() {
             }}
           >
             <Image
-              src="/placeholder.svg?height=800&width=1200"
+              src="/landing/dashboard_preview.png"
               alt="Dashboard Preview"
               fill
               className="object-cover"

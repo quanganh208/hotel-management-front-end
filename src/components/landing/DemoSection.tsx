@@ -41,7 +41,7 @@ export default function DemoSection() {
             whileHover={{ scale: 1.02 }}
           >
             <Image
-              src="/placeholder.svg?height=720&width=1280"
+              src="/landing/dashboard_preview.png"
               alt="Demo Video"
               fill
               className="object-cover"

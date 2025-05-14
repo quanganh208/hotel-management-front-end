@@ -7,6 +7,29 @@ import {
   AnimatedSection,
 } from "./AnimationComponents";
 
+const partners = [
+  {
+    name: "JW Marriott Hanoi",
+    image: "/landing/jw-marriott-hanoi.png",
+  },
+  {
+    name: "Keypad Hotel",
+    image: "/landing/keypad-hotel.png",
+  },
+  {
+    name: "Pan Pacific Hanoi",
+    image: "/landing/pan-pacific-hanoi.svg",
+  },
+  {
+    name: "The Oriental Jade",
+    image: "/landing/the-oriental-jade.png",
+  },
+  {
+    name: "Grand Plaza Hanoi",
+    image: "/landing/grand-plaza-hanoi.png",
+  },
+];
+
 export default function TrustedBySection() {
   return (
     <AnimatedSection>
@@ -24,16 +47,16 @@ export default function TrustedBySection() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
           >
-            {[1, 2, 3, 4, 5].map((i) => (
+            {partners.map((partner, i) => (
               <motion.div
                 key={i}
-                className="relative h-12 w-32 opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0"
+                className="relative h-20 w-32 opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0"
                 variants={fadeIn}
                 whileHover={{ scale: 1.1, opacity: 1, filter: "grayscale(0)" }}
               >
                 <Image
-                  src={`/placeholder.svg?height=100&width=150&text=Hotel${i}`}
-                  alt={`Hotel Partner ${i}`}
+                  src={partner.image}
+                  alt={partner.name}
                   fill
                   className="object-contain"
                 />

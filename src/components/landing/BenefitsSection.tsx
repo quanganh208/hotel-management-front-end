@@ -93,7 +93,7 @@ export default function BenefitsSection() {
               }}
             >
               <Image
-                src="/placeholder.svg?height=1000&width=800"
+                src="/landing/benefit.png"
                 alt="Hotel Management Benefits"
                 fill
                 className="object-cover"
