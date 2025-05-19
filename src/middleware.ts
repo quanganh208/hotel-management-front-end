@@ -25,12 +25,12 @@ export async function middleware(request: NextRequest) {
 
   // Kiểm tra xem route hiện tại có nằm trong danh sách route công khai không
   const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
   // Kiểm tra xem có phải API route công khai không
   const isPublicApiRoute = publicApiRoutes.some((route) =>
-    pathname.startsWith(route),
+    pathname.startsWith(route)
   );
 
   // Nếu người dùng chưa đăng nhập và đang truy cập route yêu cầu xác thực
@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
         {
           status: 401,
           headers: { "content-type": "application/json" },
-        },
+        }
       );
     }
 
@@ -97,7 +97,8 @@ export const config = {
      * 1. /_next (Next.js internals)
      * 2. /_static (static files)
      * 3. /favicon.ico, /sitemap.xml (static files)
+     * 4. /public (public files)
      */
-    "/((?!_next|_static|favicon.ico|sitemap.xml).*)",
+    "/((?!_next|_static|favicon.ico|sitemap.xml|public).*)",
   ],
 };
