@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Thiếu token captcha" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!isValid) {
       return NextResponse.json(
         { success: false, error: "Xác thực captcha thất bại" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     console.error("Lỗi xác thực captcha:", error);
     return NextResponse.json(
       { success: false, error: "Lỗi server khi xác thực captcha" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

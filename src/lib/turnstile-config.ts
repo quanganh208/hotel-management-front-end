@@ -13,7 +13,7 @@ export async function verifyTurnstileToken(token: string): Promise<boolean> {
       {
         method: "POST",
         body: formData,
-      }
+      },
     );
 
     const outcome = await result.json();
