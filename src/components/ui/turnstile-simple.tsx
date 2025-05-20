@@ -28,7 +28,7 @@ interface TurnstileAPI {
         | ((token: string) => void)
         | ((error: string) => void)
         | undefined;
-    }
+    },
   ) => string;
   reset: (widgetId: string) => void;
   remove: (widgetId: string) => void;

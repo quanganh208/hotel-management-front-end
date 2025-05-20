@@ -20,7 +20,7 @@ declare global {
     turnstile?: {
       render: (
         container: string | HTMLElement,
-        options: TurnstileOptions
+        options: TurnstileOptions,
       ) => string;
       reset: (widgetId: string) => void;
       getResponse: (widgetId: string) => string | undefined;

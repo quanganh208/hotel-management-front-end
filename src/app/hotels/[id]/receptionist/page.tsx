@@ -54,25 +54,25 @@ export default function ReceptionistPage() {
   useEffect(() => {
     const stats = {
       available: hotelRooms.filter(
-        (room) => room.status === RoomStatus.AVAILABLE
+        (room) => room.status === RoomStatus.AVAILABLE,
       ).length,
       occupied: hotelRooms.filter((room) => room.status === RoomStatus.OCCUPIED)
         .length,
       cleaning: hotelRooms.filter((room) => room.status === RoomStatus.CLEANING)
         .length,
       maintenance: hotelRooms.filter(
-        (room) => room.status === RoomStatus.MAINTENANCE
+        (room) => room.status === RoomStatus.MAINTENANCE,
       ).length,
       booked: hotelRooms.filter((room) => room.status === RoomStatus.BOOKED)
         .length,
       checked_in: hotelRooms.filter(
-        (room) => room.status === RoomStatus.CHECKED_IN
+        (room) => room.status === RoomStatus.CHECKED_IN,
       ).length,
       checked_out: hotelRooms.filter(
-        (room) => room.status === RoomStatus.CHECKED_OUT
+        (room) => room.status === RoomStatus.CHECKED_OUT,
       ).length,
       out_of_service: hotelRooms.filter(
-        (room) => room.status === RoomStatus.OUT_OF_SERVICE
+        (room) => room.status === RoomStatus.OUT_OF_SERVICE,
       ).length,
       reserved: hotelRooms.filter((room) => room.status === RoomStatus.RESERVED)
         .length,
